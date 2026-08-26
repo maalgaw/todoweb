@@ -203,7 +203,9 @@ export default function TodoListItem({
           {/* Tên việc */}
           <span
             className={`text-lg font-medium truncate ${
-              todo.isCompleted ? "text-gray-400 line-through" : "text-gray-800"
+              todo.isCompleted
+                ? "text-gray-400 line-through transition-all duration-200"
+                : "text-gray-800 transition-all duration-200"
             }`}
           >
             Tên: {todo.title}

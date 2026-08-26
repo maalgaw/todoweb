@@ -19,7 +19,7 @@ export default function NavBar({ currentTab, onTabChange }: Props) {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex h-16">
           {/* Cụm Logo */}
-          <div className="flex shrink-0 items-center mr-4 sm:mr-8 cursor-pointer select-none">
+          <div className="flex shrink-0 items-center mr-4 sm:mr-8 select-none">
             <span className="text-xl font-black text-emerald-600 tracking-tighter flex items-center gap-2">
               <span className="text-2xl drop-shadow-sm">📒</span>
               <span className="hidden sm:block">TodoApp</span>

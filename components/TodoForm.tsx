@@ -171,11 +171,16 @@ export default function TodoForm({ categories, onAdd }: Props) {
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Mô tả chi tiết
           </label>
-          {/* Ô nhập công việc */}
+          {/* Nhập mô tả công việc */}
           <textarea
             placeholder="Nhập ghi chú hoặc mô tả chi tiết..."
             value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
+            onChange={(e) => {
+              setNewDescription(e.target.value);
+              // Tự động resize chiều cao dựa vào nội dung (scroll height)
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
             rows={3}
             className={`${inputClass}`}
           />

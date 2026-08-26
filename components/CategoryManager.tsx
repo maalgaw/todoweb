@@ -106,7 +106,7 @@ export default function CategoryManager({
           categories.map((category) => (
             <li
               key={category.id}
-              className="flex items-center justify-between p-3 bg-gray-50 border border-gray-400 rounded-md"
+              className="flex items-center justify-between p-3 bg-gray-50 border border-gray-400 rounded-md hover:shadow-md transition-all duration-200"
             >
               {/* Form sửa thẻ mở ra nếu được truyền vào id thẻ */}
               {editingId === category.id ? (

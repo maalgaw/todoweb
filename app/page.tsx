@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import { TodoItem, Category } from "../types";
 import TodoForm from "../components/TodoForm";
 import FilterBar from "../components/FilterBar";
@@ -169,63 +170,72 @@ export default function Home() {
           <Toaster position="top-right" reverseOrder={false} />
         </div>
         {/* Giao diện trang web thay đổi khi mở từ nav bar */}
-        {/* Hiển thị giao diện khi ấn "Danh sách công việc" hoặc "Quản lý công việc"*/}
-        {(currentTab === "list" || currentTab === "manage_todos") && (
-          <div>
-            <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-              {currentTab === "list"
-                ? "📝 DANH SÁCH CÔNG VIỆC"
-                : "⚙️ QUẢN LÝ CÔNG VIỆC"}
-            </h1>
+        <AnimatePresence mode="wait">
+          {/* Hiển thị giao diện khi ấn "Danh sách công việc" hoặc "Quản lý công việc"*/}
+          {(currentTab === "list" || currentTab === "manage_todos") && (
+            <motion.div
+              key="list-manage"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
+                {currentTab === "list"
+                  ? "📝 DANH SÁCH CÔNG VIỆC"
+                  : "⚙️ QUẢN LÝ CÔNG VIỆC"}
+              </h1>
 
-            {/* Bảng Thống kê 3 ô */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
-                <p className="text-gray-500 text-sm font-medium mb-1">
-                  Tổng cộng
-                </p>
-                <p className="text-3xl font-bold text-gray-800">{totalCount}</p>
+              {/* Bảng Thống kê 3 ô */}
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:shadow-md">
+                  <p className="text-gray-500 text-sm font-medium mb-1">
+                    Tổng cộng
+                  </p>
+                  <p className="text-3xl font-bold text-gray-800">
+                    {totalCount}
+                  </p>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:shadow-md">
+                  <p className="text-gray-500 text-sm font-medium mb-1">
+                    Chưa xong (Còn hạn)
+                  </p>
+                  <p className="text-3xl font-bold text-blue-600">
+                    {activeCount}
+                  </p>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:shadow-md">
+                  <p className="text-gray-500 text-sm font-medium mb-1">
+                    Hoàn thành
+                  </p>
+                  <p className="text-3xl font-bold text-emerald-600">
+                    {completedCount}
+                  </p>
+                </div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
-                <p className="text-gray-500 text-sm font-medium mb-1">
-                  Chưa xong (Còn hạn)
-                </p>
-                <p className="text-3xl font-bold text-blue-600">
-                  {activeCount}
-                </p>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
-                <p className="text-gray-500 text-sm font-medium mb-1">
-                  Hoàn thành
-                </p>
-                <p className="text-3xl font-bold text-emerald-600">
-                  {completedCount}
-                </p>
-              </div>
-            </div>
 
-            {/* Component hiển thị các nút bộ lọc */}
-            <FilterBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filter={filter}
-              setFilter={setFilter}
-            />
+              {/* Component hiển thị các nút bộ lọc */}
+              <FilterBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filter={filter}
+                setFilter={setFilter}
+              />
 
-            {/* Nút chuyển đổi View Mode (Chỉ hiện ở Tab Danh sách) */}
-            {currentTab === "list" && (
-              <div className="flex justify-end mb-4 space-x-2">
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
-                    viewMode === "list"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
-                  }`}
-                >
-                  📝 Danh sách
-                </button>
-                {/*
+              {/* Nút chuyển đổi View Mode (Chỉ hiện ở Tab Danh sách) */}
+              {currentTab === "list" && (
+                <div className="flex justify-end mb-4 space-x-2">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
+                      viewMode === "list"
+                        ? "bg-emerald-600 text-white"
+                        : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
+                    }`}
+                  >
+                    📝 Danh sách
+                  </button>
+                  {/*
                 <button
                   onClick={() => setViewMode("calendar")}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
@@ -237,61 +247,74 @@ export default function Home() {
                   📅 Lịch
                 </button>
                 */}
-              </div>
-            )}
+                </div>
+              )}
 
-            {/* Hiển thị dữ liệu các công việc */}
-            {viewMode === "list" || currentTab === "manage_todos" ? (
-              <div className="bg-white/50 p-3 rounded-xl border border-gray-400 shadow-inner">
-                <ul className="space-y-4 h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  {filteredTodos.map((todo) => (
-                    //Mở component hiển thị danh sách công việc
-                    <TodoListItem
-                      key={todo.id}
-                      todo={todo}
-                      categories={categories}
-                      onToggle={handleCompleteToggle}
-                      onDelete={handleDelete}
-                      onSave={handleEdit}
-                      isManage={currentTab === "manage_todos"}
-                    />
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              //Kiểu lịch
-              //<TodoCalendar todos={filteredTodos} />
-              <></>
-            )}
-            {/* Hiển thị số lượng công việc */}
-            {renderStatusText()}
-          </div>
-        )}
+              {/* Hiển thị dữ liệu các công việc */}
+              {viewMode === "list" || currentTab === "manage_todos" ? (
+                <div className="bg-white/50 p-3 rounded-xl border border-gray-400 shadow-inner">
+                  <ul className="space-y-4 h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    {filteredTodos.map((todo) => (
+                      //Mở component hiển thị danh sách công việc
+                      <TodoListItem
+                        key={todo.id}
+                        todo={todo}
+                        categories={categories}
+                        onToggle={handleCompleteToggle}
+                        onDelete={handleDelete}
+                        onSave={handleEdit}
+                        isManage={currentTab === "manage_todos"}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                //Kiểu lịch
+                //<TodoCalendar todos={filteredTodos} />
+                <></>
+              )}
+              {/* Hiển thị số lượng công việc */}
+              {renderStatusText()}
+            </motion.div>
+          )}
 
-        {/* Hiển thị giao diện khi ấn "Thêm công việc" */}
-        {currentTab === "add" && (
-          <div>
-            <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-              ➕ THÊM CÔNG VIỆC
-            </h1>
-            {/* Mở component form tạo mới công việc */}
-            <TodoForm categories={categories} onAdd={handleAdd} />
-          </div>
-        )}
+          {/* Hiển thị giao diện khi ấn "Thêm công việc" */}
+          {currentTab === "add" && (
+            <motion.div
+              key="add"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
+                ➕ THÊM CÔNG VIỆC
+              </h1>
+              {/* Mở component form tạo mới công việc */}
+              <TodoForm categories={categories} onAdd={handleAdd} />
+            </motion.div>
+          )}
 
-        {/* Hiển thị giao diện khi ấn "Quản lý thẻ" */}
-        {currentTab === "manage_categories" && (
-          <div>
-            <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-              🏷️ QUẢN LÝ THẺ
-            </h1>
-            {/* Mở component quản lý thẻ */}
-            <CategoryManager
-              categories={categories}
-              refreshCategories={fetchCategories}
-            />
-          </div>
-        )}
+          {/* Hiển thị giao diện khi ấn "Quản lý thẻ" */}
+          {currentTab === "manage_categories" && (
+            <motion.div
+              key="manage_categories"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
+                🏷️ QUẢN LÝ THẺ
+              </h1>
+              {/* Mở component quản lý thẻ */}
+              <CategoryManager
+                categories={categories}
+                refreshCategories={fetchCategories}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

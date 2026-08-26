@@ -76,12 +76,12 @@ export default function TodoListItem({
 
   //Css các ô điền khi sửa
   const editInputClass =
-    "w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm";
+    "w-full px-3 py-2 border border-gray-500 rounded-md text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm";
 
   //Nếu bấm vào nút sửa => hiển thị giao diện này
   if (isEditing) {
     return (
-      <li className="flex bg-white p-4 items-center border border-gray-200 rounded-lg shadow-sm">
+      <li className="flex bg-white p-4 items-center border border-gray-400 rounded-lg shadow-sm">
         <div className="flex flex-col gap-3 w-full">
           <input
             type="text"
@@ -185,7 +185,7 @@ export default function TodoListItem({
 
   //Nếu không bấm vào sửa
   return (
-    <li className="flex bg-white p-4 gap-4 items-center border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+    <li className="flex bg-white p-4 gap-4 items-center border border-gray-400 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
       {/* Chỉ hiện khi ở trang quản lý công việc */}
       {isManage === true && (
         <input
@@ -228,7 +228,7 @@ export default function TodoListItem({
 
           {/* Thẻ côgn việc */}
           {todo.category && (
-            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium border border-gray-200 flex items-center gap-1">
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium border border-gray-400 flex items-center gap-1">
               🏷️ {todo.category.name}
             </span>
           )}

@@ -180,13 +180,13 @@ export default function Home() {
 
             {/* Bảng Thống kê 3 ô */}
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
+              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
                 <p className="text-gray-500 text-sm font-medium mb-1">
                   Tổng cộng
                 </p>
                 <p className="text-3xl font-bold text-gray-800">{totalCount}</p>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
+              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
                 <p className="text-gray-500 text-sm font-medium mb-1">
                   Chưa xong (Còn hạn)
                 </p>
@@ -194,7 +194,7 @@ export default function Home() {
                   {activeCount}
                 </p>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
+              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
                 <p className="text-gray-500 text-sm font-medium mb-1">
                   Hoàn thành
                 </p>
@@ -220,7 +220,7 @@ export default function Home() {
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
                     viewMode === "list"
                       ? "bg-emerald-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                      : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
                   }`}
                 >
                   📝 Danh sách
@@ -231,7 +231,7 @@ export default function Home() {
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
                     viewMode === "calendar"
                       ? "bg-emerald-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                      : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
                   }`}
                 >
                   📅 Lịch
@@ -242,7 +242,7 @@ export default function Home() {
 
             {/* Hiển thị dữ liệu các công việc */}
             {viewMode === "list" || currentTab === "manage_todos" ? (
-              <div className="bg-white/50 p-3 rounded-xl border border-gray-200 shadow-inner">
+              <div className="bg-white/50 p-3 rounded-xl border border-gray-400 shadow-inner">
                 <ul className="space-y-4 h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                   {filteredTodos.map((todo) => (
                     //Mở component hiển thị danh sách công việc

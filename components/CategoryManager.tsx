@@ -75,7 +75,7 @@ export default function CategoryManager({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-400">
       <h2 className="text-xl font-bold mb-4 text-gray-800">
         Quản lý thẻ phân loại
       </h2>
@@ -87,7 +87,7 @@ export default function CategoryManager({
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="flex-1 px-4 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
         <button
           onClick={handleAdd}
@@ -106,7 +106,7 @@ export default function CategoryManager({
           categories.map((category) => (
             <li
               key={category.id}
-              className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md"
+              className="flex items-center justify-between p-3 bg-gray-50 border border-gray-400 rounded-md"
             >
               {/* Form sửa thẻ mở ra nếu được truyền vào id thẻ */}
               {editingId === category.id ? (
@@ -115,7 +115,7 @@ export default function CategoryManager({
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="flex-1 px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-1 border border-gray-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     onClick={() => handleSaveEdit(category.id)}

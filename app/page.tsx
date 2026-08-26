@@ -162,7 +162,7 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div>
       <NavBar currentTab={currentTab} onTabChange={setCurrentTab} />
       <div className="w-full px-4 sm:px-6 md:px-10 mt-8 mb-20">
         {/* Hộp thông báo của react-hot-toast */}
@@ -236,24 +236,24 @@ export default function Home() {
                     📝 Danh sách
                   </button>
                   {/*
-                <button
-                  onClick={() => setViewMode("calendar")}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
-                    viewMode === "calendar"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
-                  }`}
-                >
-                  📅 Lịch
-                </button>
-                */}
+                  <button
+                    onClick={() => setViewMode("calendar")}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
+                      viewMode === "calendar"
+                        ? "bg-emerald-600 text-white"
+                        : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
+                    }`}
+                  >
+                    📅 Lịch
+                  </button>
+                  */}
                 </div>
               )}
 
               {/* Hiển thị dữ liệu các công việc */}
               {viewMode === "list" || currentTab === "manage_todos" ? (
-                <div className="bg-white/50 p-3 rounded-xl border border-gray-400 shadow-inner">
-                  <ul className="space-y-4 h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="bg-white p-3 rounded-xl border border-gray-400 shadow-inner bg-co">
+                  <ul className="space-y-4 h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
                     {filteredTodos.map((todo) => (
                       //Mở component hiển thị danh sách công việc
                       <TodoListItem

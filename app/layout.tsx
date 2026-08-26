@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi">
-      <body>{children}</body>
+      <body className="bg-gray-50 min-h-screen bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]">
+        {children}
+      </body>
     </html>
   );
 }

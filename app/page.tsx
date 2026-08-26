@@ -5,10 +5,11 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { TodoItem, Category } from "../types";
 import TodoForm from "../components/TodoForm";
-import FilterBar from "../components/Filter";
+import FilterBar from "../components/FilterBar";
 import TodoListItem from "../components/TodoListItem";
 import NavBar from "../components/NavBar";
 import CategoryManager from "../components/CategoryManager";
+//import TodoCalendar from "../components/TodoCalendar";
 
 export default function Home() {
   //Lưu trữ tạm thời dữ liệu các công việc và thẻ
@@ -25,6 +26,9 @@ export default function Home() {
   type Tab = "list" | "add" | "manage_todos" | "manage_categories";
   //Mặc định là list - danh sách công việc
   const [currentTab, setCurrentTab] = useState<Tab>("list");
+
+  //Chế độ xem: danh sách hoặc lịch
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
   //Hàm cập nhật danh sách công việc
   function fetchTodos() {
@@ -131,6 +135,10 @@ export default function Home() {
     (todo) => todo.isCompleted === false && !isOverDue(todo.dueDate),
   ).length;
 
+  // Thống kê chung
+  const totalCount = todos.length;
+  const completedCount = todos.filter((t) => t.isCompleted).length;
+
   //Hiển thị tuỳ số lượng công việc chưa hoàn thành
   function renderStatusText() {
     if (todos.length === 0)
@@ -169,6 +177,33 @@ export default function Home() {
                 ? "📝 DANH SÁCH CÔNG VIỆC"
                 : "⚙️ QUẢN LÝ CÔNG VIỆC"}
             </h1>
+
+            {/* Bảng Thống kê 3 ô */}
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Tổng cộng
+                </p>
+                <p className="text-3xl font-bold text-gray-800">{totalCount}</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Chưa xong (Còn hạn)
+                </p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {activeCount}
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center transition-transform hover:scale-105">
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Hoàn thành
+                </p>
+                <p className="text-3xl font-bold text-emerald-600">
+                  {completedCount}
+                </p>
+              </div>
+            </div>
+
             {/* Component hiển thị các nút bộ lọc */}
             <FilterBar
               searchQuery={searchQuery}
@@ -176,23 +211,58 @@ export default function Home() {
               filter={filter}
               setFilter={setFilter}
             />
+
+            {/* Nút chuyển đổi View Mode (Chỉ hiện ở Tab Danh sách) */}
+            {currentTab === "list" && (
+              <div className="flex justify-end mb-4 space-x-2">
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
+                    viewMode === "list"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  📝 Danh sách
+                </button>
+                {/*
+                <button
+                  onClick={() => setViewMode("calendar")}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
+                    viewMode === "calendar"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  📅 Lịch
+                </button>
+                */}
+              </div>
+            )}
+
             {/* Hiển thị dữ liệu các công việc */}
-            <div className="bg-white/50 p-3 rounded-xl border border-gray-200 shadow-inner">
-              <ul className="space-y-4 h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                {filteredTodos.map((todo) => (
-                  //Mở component hiển thị danh sách công việc
-                  <TodoListItem
-                    key={todo.id}
-                    todo={todo}
-                    categories={categories}
-                    onToggle={handleCompleteToggle}
-                    onDelete={handleDelete}
-                    onSave={handleEdit}
-                    isManage={currentTab === "manage_todos"}
-                  />
-                ))}
-              </ul>
-            </div>
+            {viewMode === "list" || currentTab === "manage_todos" ? (
+              <div className="bg-white/50 p-3 rounded-xl border border-gray-200 shadow-inner">
+                <ul className="space-y-4 h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {filteredTodos.map((todo) => (
+                    //Mở component hiển thị danh sách công việc
+                    <TodoListItem
+                      key={todo.id}
+                      todo={todo}
+                      categories={categories}
+                      onToggle={handleCompleteToggle}
+                      onDelete={handleDelete}
+                      onSave={handleEdit}
+                      isManage={currentTab === "manage_todos"}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              //Kiểu lịch
+              //<TodoCalendar todos={filteredTodos} />
+              <></>
+            )}
             {/* Hiển thị số lượng công việc */}
             {renderStatusText()}
           </div>

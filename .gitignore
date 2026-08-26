@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /out/
+/components/TodoCalendar.tsx
 
 # production
 /build

@@ -94,43 +94,77 @@ export default function TodoForm({ categories, onAdd }: Props) {
           </div>
 
           <div>
+            {/* Chọn thẻ phân loại */}
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Thẻ phân loại
             </label>
-            {/* Chọn thẻ phân loại công việc*/}
-            <select
-              value={newCategoryId}
-              onChange={(e) =>
-                setNewCategoryId(
-                  e.target.value === "" ? "" : Number(e.target.value),
-                )
-              }
-              className={inputClass}
-            >
-              <option value="">Không gắn thẻ</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={newCategoryId}
+                onChange={(e) =>
+                  setNewCategoryId(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                className={`${inputClass} appearance-none pr-10`}
+              >
+                <option value="">Không gắn thẻ</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
         <div>
+          {/* Chọn mức độ ưu tiên */}
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Mức độ ưu tiên
           </label>
-          {/* Mức độ yưu tiên công việc */}
-          <select
-            value={newPriority}
-            onChange={(e) => setNewPriority(Number(e.target.value))}
-            className={inputClass}
-          >
-            <option value={0}>🟩 Ưu tiên thấp</option>
-            <option value={1}>🟨 Ưu tiên trung bình</option>
-            <option value={2}>🟥 Ưu tiên cao</option>
-          </select>
+          <div className="relative">
+            <select
+              value={newPriority}
+              onChange={(e) => setNewPriority(Number(e.target.value))}
+              className={`${inputClass} appearance-none pr-10`}
+            >
+              <option value={0}>🟩 Ưu tiên thấp</option>
+              <option value={1}>🟨 Ưu tiên trung bình</option>
+              <option value={2}>🟥 Ưu tiên cao</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -143,7 +177,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
             rows={3}
-            className={`${inputClass} resize-y`}
+            className={`${inputClass}`}
           />
         </div>
 

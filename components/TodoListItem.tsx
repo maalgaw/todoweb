@@ -76,7 +76,7 @@ export default function TodoListItem({
 
   //Css các ô điền khi sửa
   const editInputClass =
-    "px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm";
+    "w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm";
 
   //Nếu bấm vào nút sửa => hiển thị giao diện này
   if (isEditing) {
@@ -104,31 +104,65 @@ export default function TodoListItem({
             onChange={(e) => setEditDescription(e.target.value)}
             className={editInputClass}
           />
-          <select
-            value={editPriority}
-            onChange={(e) => setEditPriority(Number(e.target.value))}
-            className={editInputClass}
-          >
-            <option value={0}>🟩 Thấp</option>
-            <option value={1}>🟨 Vừa</option>
-            <option value={2}>🟥 Cao</option>
-          </select>
-          <select
-            value={editCategoryId}
-            onChange={(e) =>
-              setEditCategoryId(
-                e.target.value === "" ? "" : Number(e.target.value),
-              )
-            }
-            className={editInputClass}
-          >
-            <option value="">Không gắn thẻ</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={editPriority}
+              onChange={(e) => setEditPriority(Number(e.target.value))}
+              className={`${editInputClass} appearance-none pr-10`}
+            >
+              <option value={0}>🟩 Thấp</option>
+              <option value={1}>🟨 Vừa</option>
+              <option value={2}>🟥 Cao</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <div className="relative">
+            <select
+              value={editCategoryId}
+              onChange={(e) =>
+                setEditCategoryId(
+                  e.target.value === "" ? "" : Number(e.target.value),
+                )
+              }
+              className={`${editInputClass} appearance-none pr-10`}
+            >
+              <option value="">Không gắn thẻ</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </div>
+          </div>
 
           <div className="flex gap-2 mt-1">
             <button
@@ -152,7 +186,7 @@ export default function TodoListItem({
   //Nếu không bấm vào sửa
   return (
     <li className="flex bg-white p-4 gap-4 items-center border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
-      {/* Chỉ hiện Khi ở trang quản lý công việc */}
+      {/* Chỉ hiện khi ở trang quản lý công việc */}
       {isManage === true && (
         <input
           type="checkbox"

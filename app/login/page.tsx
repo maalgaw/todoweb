@@ -22,8 +22,8 @@ export default function LoginPage() {
         password,
       });
 
-      const { token, username: returnedUsername, role } = response.data;
-      login(token, returnedUsername, role);
+      const { token, username: returnedUsername, role, displayName, avatarUrl } = response.data;
+      login(token, returnedUsername, role, displayName, avatarUrl);
       toast.success("Đăng nhập thành công!");
     } catch (error) {
       const axiosError = error as {
@@ -37,7 +37,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]">
-      <Toaster position="bottom-left" />
+      <Toaster position="bottom-left" toastOptions={{ duration: 1500 }} />
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

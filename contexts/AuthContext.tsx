@@ -6,13 +6,22 @@ import { useRouter } from 'next/navigation';
 interface User {
   username: string;
   role: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string, username: string, role: string) => void;
+  login: (
+    token: string,
+    username: string,
+    role: string,
+    displayName?: string | null,
+    avatarUrl?: string | null
+  ) => void;
   logout: () => void;
+  updateUser: (data: { displayName?: string | null; avatarUrl?: string | null }) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -30,10 +39,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedToken = localStorage.getItem('token');
       const storedUsername = localStorage.getItem('username');
       const storedRole = localStorage.getItem('role');
+      const storedDisplayName = localStorage.getItem('displayName');
+      const storedAvatarUrl = localStorage.getItem('avatarUrl');
 
       if (storedToken && storedUsername && storedRole) {
         setToken(storedToken);
-        setUser({ username: storedUsername, role: storedRole });
+        setUser({ 
+          username: storedUsername, 
+          role: storedRole,
+          displayName: storedDisplayName,
+          avatarUrl: storedAvatarUrl
+        });
       }
       setIsLoading(false);
     };
@@ -41,12 +57,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const login = (newToken: string, username: string, role: string) => {
+  const login = (
+    newToken: string,
+    username: string,
+    role: string,
+    displayName?: string | null,
+    avatarUrl?: string | null
+  ) => {
+    setToken(newToken);
+    setUser({ username, role, displayName, avatarUrl });
     localStorage.setItem('token', newToken);
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
-    setToken(newToken);
-    setUser({ username, role });
+    if (displayName) localStorage.setItem('displayName', displayName);
+    if (avatarUrl) localStorage.setItem('avatarUrl', avatarUrl);
     router.push('/'); // Đăng nhập xong chuyển về trang chủ
   };
 
@@ -54,9 +78,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('role');
+    localStorage.removeItem('displayName');
+    localStorage.removeItem('avatarUrl');
     setToken(null);
     setUser(null);
     router.push('/login'); // Đăng xuất xong bị văng về trang đăng nhập
+  };
+
+  const updateUser = (data: { displayName?: string | null; avatarUrl?: string | null }) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const newUser = { ...prev, ...data };
+      if (data.displayName !== undefined) {
+        if (data.displayName) localStorage.setItem('displayName', data.displayName);
+        else localStorage.removeItem('displayName');
+      }
+      if (data.avatarUrl !== undefined) {
+        if (data.avatarUrl) localStorage.setItem('avatarUrl', data.avatarUrl);
+        else localStorage.removeItem('avatarUrl');
+      }
+      return newUser;
+    });
   };
 
   return (
@@ -66,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!token,
         isLoading,
       }}

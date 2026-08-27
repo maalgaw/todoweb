@@ -76,9 +76,12 @@ export default function Home() {
     fetchTodos();
     fetchCategories();
     fetchTrashTodos();
-    toast("Chào mừng đến với app quản lý công việc!", {
-      icon: "🎉",
-    });
+    if (!sessionStorage.getItem("welcomeShown")) {
+      toast("Chào mừng đến với app quản lý công việc!", {
+        icon: "🎉",
+      });
+      sessionStorage.setItem("welcomeShown", "true");
+    }
   }, []);
 
   //Xử lý khi ấn nút thêm
@@ -189,7 +192,7 @@ export default function Home() {
       <div className="w-full px-4 sm:px-6 md:px-10 mt-8 mb-20">
         {/* Hộp thông báo của react-hot-toast */}
         <div>
-          <Toaster position="bottom-left" reverseOrder={true} />
+          <Toaster position="bottom-left" reverseOrder={true} toastOptions={{ duration: 1500 }} />
         </div>
         {/* Giao diện trang web thay đổi khi mở từ nav bar */}
         <AnimatePresence mode="wait">

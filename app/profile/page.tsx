@@ -1,0 +1,328 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../contexts/AuthContext";
+import api from "../../lib/axiosConfig";
+import { supabase } from "../../lib/supabase";
+import { toast, Toaster } from "react-hot-toast";
+import { motion } from "framer-motion";
+import Link from "next/link";
+
+export default function ProfilePage() {
+  const {
+    user,
+    updateUser,
+    isAuthenticated,
+    isLoading: authLoading,
+  } = useAuth();
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    // Fetch latest profile on load
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get("/api/users/profile");
+        const data = response.data;
+        setDisplayName(data.displayName || "");
+        setAvatarUrl(data.avatarUrl || "");
+      } catch (error) {
+        console.error("Failed to fetch profile", error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchProfile();
+    }
+  }, [isAuthenticated]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh");
+      return;
+    }
+
+    setIsUploading(true);
+    const toastId = toast.loading("Đang tải ảnh lên...");
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user?.username}-${Date.now()}.${fileExt}`;
+
+      // Thử xóa ảnh cũ (nếu có) trên Supabase để tiết kiệm dung lượng
+      const oldUrl = avatarUrl || user?.avatarUrl;
+      if (oldUrl) {
+        const oldFileName = oldUrl.split("/avatars/").pop();
+        if (oldFileName) {
+          // Xóa ngầm ảnh cũ, không cần chờ và không cần hiện thông báo
+          supabase.storage.from("avatars").remove([oldFileName]).catch(() => {});
+        }
+      }
+
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+
+      setAvatarUrl(publicUrlData.publicUrl);
+      toast.success("Tải ảnh thành công!", { id: toastId });
+    } catch (error) {
+      const msg = (error as Error).message || "Lỗi khi tải ảnh lên Supabase";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    if (newPassword && newPassword !== confirmPassword) {
+      toast.error("Mật khẩu nhập lại không khớp");
+      return;
+    }
+
+    if (newPassword && !oldPassword) {
+      toast.error("Vui lòng nhập mật khẩu cũ để đổi mật khẩu mới");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await api.put("/api/users/profile", {
+        displayName: displayName || null,
+        avatarUrl: avatarUrl || null,
+        oldPassword: oldPassword || null,
+        newPassword: newPassword || null,
+      });
+
+      // Cập nhật lại context
+      updateUser({
+        displayName: displayName || null,
+        avatarUrl: avatarUrl || null,
+      });
+      toast.success("Cập nhật thông tin thành công!");
+
+      // Xóa form password
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      const msg =
+        axiosError.response?.data?.message || "Lỗi khi cập nhật thông tin";
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (authLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Đang tải...
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[20px_20px] py-10">
+      <Toaster position="bottom-left" toastOptions={{ duration: 1500 }} />
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+          >
+            <span>&larr;</span> Quay lại trang chủ
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Quản lý Tài khoản
+          </h1>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100"
+        >
+          <div className="p-8">
+            <div className="flex flex-col md:flex-row gap-10">
+              {/* Cột trái: Avatar */}
+              <div className="flex flex-col items-center shrink-0">
+                <div className="w-40 h-40 rounded-full bg-emerald-100 border-4 border-emerald-500 overflow-hidden shadow-lg relative group flex items-center justify-center mb-4">
+                  {avatarUrl || user?.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatarUrl || user?.avatarUrl || ""}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-5xl text-emerald-700 font-bold">
+                      {displayName
+                        ? displayName.charAt(0).toUpperCase()
+                        : user?.username.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+
+                  {/* Overlay hover */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white"
+                  >
+                    <span className="text-2xl mb-1">📸</span>
+                    <span className="text-sm font-medium">
+                      {isUploading ? "Đang tải..." : "Đổi ảnh"}
+                    </span>
+                  </div>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                >
+                  {isUploading ? "Đang tải lên..." : "Tải ảnh mới lên"}
+                </button>
+                <p className="text-xs text-gray-400 mt-2 text-center max-w-37.5">
+                  Dung lượng tối đa 2MB. Hỗ trợ JPG, PNG.
+                </p>
+              </div>
+
+              {/* Cột phải: Form */}
+              <div className="flex-1 space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 border-b pb-2">
+                    Thông tin cơ bản
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tên đăng nhập (Không thể đổi)
+                      </label>
+                      <input
+                        type="text"
+                        value={user?.username}
+                        disabled
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tên hiển thị
+                      </label>
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Nhập tên hiển thị của bạn..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 border-b pb-2">
+                    Đổi mật khẩu
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Mật khẩu hiện tại
+                      </label>
+                      <input
+                        type="password"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        placeholder="Bỏ trống nếu không muốn đổi"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Mật khẩu mới
+                        </label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nhập lại mật khẩu mới
+                        </label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 flex justify-end">
+                  <button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-colors"
+                  >
+                    {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

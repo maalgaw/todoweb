@@ -41,10 +41,10 @@ export default function TrashView({
               key={todo.id}
               todo={todo}
               categories={categories}
-              onToggle={() => {}} // Không cho check khi ở trong thùng rác
-              onDelete={handleHardDelete}
-              onSave={handleEdit}
-              onRestore={() => handleRestore(todo)}
+              handleCompleteToggle={() => {}} // Không cho check khi ở trong thùng rác
+              handleDelete={handleHardDelete}
+              handleEdit={handleEdit}
+              handleRestore={() => handleRestore(todo)}
               isManage={false}
               isTrashView={true}
             />

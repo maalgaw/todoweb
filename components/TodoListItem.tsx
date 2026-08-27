@@ -22,24 +22,24 @@ function isOverDue(dueDate?: string | null) {
 interface Props {
   todo: TodoItem;
   categories: Category[];
-  onToggle: (todo: TodoItem) => void;
-  onDelete: (id: number) => void;
-  onSave: (id: number, updatedData: TodoItem) => void;
+  handleCompleteToggle: (todo: TodoItem) => void;
+  handleDelete: (id: number) => void;
+  handleEdit: (id: number, updatedData: TodoItem) => void;
   isManage?: boolean;
   isTrashView?: boolean;
-  onRestore?: () => void;
+  handleRestore?: () => void;
 }
 
 export default function TodoListItem({
   //Destructuring
   todo,
   categories,
-  onToggle,
-  onDelete,
-  onSave,
+  handleCompleteToggle,
+  handleDelete,
+  handleEdit,
   isManage = false,
   isTrashView = false,
-  onRestore,
+  handleRestore,
 }: Props) {
   //Mặc định giao diện chỉnh sửa được tắt
   const [isEditing, setIsEditing] = useState(false);
@@ -71,17 +71,17 @@ export default function TodoListItem({
     }
   };
 
-  //Nếu bấm vào nút sửa => Mở giao diện sửa => Truyền vào dữ liệu cần sửa
+  //Nếu bấm vào nút sửa => hiển thị giao diện này
   if (isEditing) {
     return (
       <TodoItemEdit
         todo={todo}
         categories={categories}
-        onSave={(id, data) => {
-          onSave(id, data);
+        handleEdit={(id, data) => {
+          handleEdit(id, data);
           setIsEditing(false);
         }}
-        onCancel={() => setIsEditing(false)}
+        handleCancel={() => setIsEditing(false)}
       />
     );
   }
@@ -97,7 +97,7 @@ export default function TodoListItem({
           type="checkbox"
           checked={todo.isCompleted}
           disabled={!isManage}
-          onChange={() => onToggle(todo)}
+          onChange={() => handleCompleteToggle(todo)}
           className="appearance-none w-6 h-6 border-2 border-gray-400 rounded flex items-center justify-center bg-white cursor-pointer transition-transform hover:scale-110 checked:bg-green-600 checked:border-green-600 after:content-['✔'] after:text-white after:text-sm after:hidden checked:after:block disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         />
       )}
@@ -182,7 +182,7 @@ export default function TodoListItem({
               <button
                 onClick={() => {
                   setIsConfirmingDelete(false);
-                  onDelete(todo.id);
+                  handleDelete(todo.id);
                 }}
                 className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors border border-red-200"
                 title="Xác nhận xóa"
@@ -208,7 +208,7 @@ export default function TodoListItem({
               {isManage && !isTrashView && (
                 <button
                   onClick={() =>
-                    onSave(todo.id, { ...todo, isPinned: !todo.isPinned })
+                    handleEdit(todo.id, { ...todo, isPinned: !todo.isPinned })
                   }
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors border ${todo.isPinned ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200" : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-200"}`}
                   title={todo.isPinned ? "Bỏ ghim" : "Ghim"}
@@ -241,9 +241,9 @@ export default function TodoListItem({
               )}
 
               {/* Nút Khôi phục (Chỉ ở Thùng rác) */}
-              {isTrashView && onRestore && (
+              {isTrashView && handleRestore && (
                 <button
-                  onClick={onRestore}
+                  onClick={handleRestore}
                   className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-md text-sm font-medium transition-colors border border-emerald-200"
                   title="Khôi phục"
                 >

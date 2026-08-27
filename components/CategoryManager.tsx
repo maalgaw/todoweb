@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../lib/axiosConfig";
 import toast from "react-hot-toast";
 import { Category } from "../types";
 
@@ -26,7 +26,7 @@ export default function CategoryManager({
       return;
     }
     try {
-      await axios.post("/api/categories", { name: newCategoryName.trim() });
+      await api.post("/api/categories", { name: newCategoryName.trim() });
       setNewCategoryName("");
       refreshCategories();
       toast.success("Thêm thẻ thành công");
@@ -44,7 +44,7 @@ export default function CategoryManager({
     )
       return;
     try {
-      await axios.delete(`/api/categories/${id}`);
+      await api.delete(`/api/categories/${id}`);
       refreshCategories();
       toast.success("Đã xóa thẻ");
     } catch {
@@ -65,7 +65,7 @@ export default function CategoryManager({
       return;
     }
     try {
-      await axios.put(`/api/categories/${id}`, { id, name: editName.trim() });
+      await api.put(`/api/categories/${id}`, { id, name: editName.trim() });
       setEditingId(null);
       refreshCategories();
       toast.success("Đã cập nhật thẻ");

@@ -197,7 +197,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
         {/* Demo hiển thị */}
         <div className="mt-4 pt-6 border-t border-gray-200">
           <label className="block text-sm font-medium text-gray-700 mb-3 uppercase tracking-wider">
-            Demo hiển thị ở danh sách
+            Demo hiển thị:
           </label>
           <ul className="list-none m-0 p-0">
             <TodoListItem
@@ -217,9 +217,9 @@ export default function TodoForm({ categories, onAdd }: Props) {
                     : categories.find((c) => c.id === newCategoryId),
               }}
               categories={categories}
-              onToggle={() => {}}
-              onDelete={() => {}}
-              onSave={() => {}}
+              handleCompleteToggle={() => {}}
+              handleDelete={() => {}}
+              handleEdit={() => {}}
               isManage={false}
               isTrashView={false}
             />

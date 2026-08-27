@@ -6,16 +6,16 @@ import toast from "react-hot-toast";
 interface Props {
   todo: TodoItem;
   categories: Category[];
-  onSave: (id: number, updatedData: TodoItem) => void;
-  onCancel: () => void;
+  handleEdit: (id: number, updatedData: TodoItem) => void;
+  handleCancel: () => void;
 }
 
 export default function TodoItemEdit({
   //Destructuring
   todo,
   categories,
-  onSave,
-  onCancel,
+  handleEdit,
+  handleCancel,
 }: Props) {
   //Hiện DL công việc cần sửa vào ô sửa
   const [editTitle, setEditTitle] = useState(todo.title);
@@ -33,7 +33,7 @@ export default function TodoItemEdit({
   //Xử lý khi bấm lưu
   const handleSave = () => {
     if (!confirm("Bạn có chắc chắn muốn lưu những sửa đổi này không?")) return;
-    onSave(todo.id, {
+    handleEdit(todo.id, {
       ...todo,
       title: editTitle.trim(),
       dueDate: editDueDate || null,
@@ -139,7 +139,7 @@ export default function TodoItemEdit({
             Lưu
           </button>
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
             className="px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-md text-sm font-medium transition-colors"
           >
             Hủy

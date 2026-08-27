@@ -1,4 +1,5 @@
 //Định nghĩa thanh navbar
+import { useAuth } from '../contexts/AuthContext';
 interface Props {
   currentTab: "list" | "add" | "manage_categories" | "trash";
   onTabChange: (
@@ -13,6 +14,8 @@ export default function NavBar({ currentTab, onTabChange }: Props) {
     { id: "manage_categories", label: "Quản lý thẻ" },
     { id: "trash", label: "Thùng rác" },
   ] as const;
+
+  const { user, logout } = useAuth();
 
   return (
     <nav className="bg-white/20 backdrop-blur-md shadow-sm border-b border-gray-400 sticky top-0 z-50">
@@ -42,6 +45,21 @@ export default function NavBar({ currentTab, onTabChange }: Props) {
               </button>
             ))}
           </div>
+
+          {/* User Info & Logout */}
+          {user && (
+            <div className="flex items-center ml-4">
+              <span className="text-sm text-gray-700 mr-4 hidden sm:block">
+                Xin chào, <span className="font-semibold">{user.username}</span>
+              </span>
+              <button
+                onClick={logout}
+                className="px-3 py-1 text-sm font-medium text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

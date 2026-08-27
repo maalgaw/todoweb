@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "../contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Todo App",
@@ -12,7 +13,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi">
       <body className="bg-gray-50 min-h-screen bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

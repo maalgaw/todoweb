@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../lib/axiosConfig";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { TodoItem, Category } from "../types";
@@ -36,9 +38,18 @@ export default function Home() {
   //Chế độ xem: danh sách hoặc lịch
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   //Hàm cập nhật danh sách công việc
   function fetchTodos() {
-    axios
+    api
       .get("/api/todos")
       .then((res) => setTodos(res.data))
       .catch(() => toast.error("Không thể kết nối server API công việc"));
@@ -46,7 +57,7 @@ export default function Home() {
 
   //Hàm cập nhật danh sách thẻ
   function fetchCategories() {
-    axios
+    api
       .get("/api/categories")
       .then((res) => setCategories(res.data))
       .catch(() => toast.error("Không thể tải danh sách thẻ"));
@@ -54,7 +65,7 @@ export default function Home() {
 
   //Hàm cập nhật danh sách thùng rác
   function fetchTrashTodos() {
-    axios
+    api
       .get("/api/todos/trash")
       .then((res) => setTrashTodos(res.data))
       .catch(() => toast.error("Không thể tải danh sách thùng rác"));
@@ -78,7 +89,7 @@ export default function Home() {
     priority: number,
     categoryId: number | "",
   ) {
-    await axios.post("/api/todos", {
+    await api.post("/api/todos", {
       title,
       dueDate: dueDate || null,
       description,
@@ -92,7 +103,7 @@ export default function Home() {
 
   //Xử lý khi ấn vào ô đánh dấu công việc
   async function handleCompleteToggle(todo: TodoItem) {
-    await axios.put(`/api/todos/${todo.id}`, {
+    await api.put(`/api/todos/${todo.id}`, {
       ...todo,
       isCompleted: !todo.isCompleted,
     });
@@ -102,7 +113,7 @@ export default function Home() {
 
   //Xử lý khi bấm nút xoá
   async function handleDelete(id: number) {
-    await axios.delete(`/api/todos/${id}`);
+    await api.delete(`/api/todos/${id}`);
     fetchTodos();
     fetchTrashTodos();
     toast.success("Đã đưa công việc vào thùng rác!");
@@ -110,7 +121,7 @@ export default function Home() {
 
   //Xử lý khôi phục công việc
   async function handleRestore(todo: TodoItem) {
-    await axios.put(`/api/todos/${todo.id}`, { ...todo, isDeleted: false });
+    await api.put(`/api/todos/${todo.id}`, { ...todo, isDeleted: false });
     fetchTodos();
     fetchTrashTodos();
     toast.success("Đã khôi phục công việc!");
@@ -118,14 +129,14 @@ export default function Home() {
 
   //Xử lý xoá vĩnh viễn
   async function handleHardDelete(id: number) {
-    await axios.delete(`/api/todos/trash/${id}`);
+    await api.delete(`/api/todos/trash/${id}`);
     fetchTrashTodos();
     toast.success("Đã xoá vĩnh viễn!");
   }
 
   //Xử lý khi ấn nút sửa
   async function handleEdit(id: number, updatedData: TodoItem) {
-    await axios.put(`/api/todos/${id}`, updatedData);
+    await api.put(`/api/todos/${id}`, updatedData);
     fetchTodos();
   }
 
@@ -164,13 +175,21 @@ export default function Home() {
   const totalCount = todos.length;
   const completedCount = todos.filter((t) => t.isCompleted).length;
 
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Đang tải...
+      </div>
+    );
+  }
+
   return (
     <div>
       <NavBar currentTab={currentTab} onTabChange={setCurrentTab} />
       <div className="w-full px-4 sm:px-6 md:px-10 mt-8 mb-20">
         {/* Hộp thông báo của react-hot-toast */}
         <div>
-          <Toaster position="top-right" reverseOrder={false} />
+          <Toaster position="bottom-left" reverseOrder={true} />
         </div>
         {/* Giao diện trang web thay đổi khi mở từ nav bar */}
         <AnimatePresence mode="wait">
@@ -308,9 +327,9 @@ export default function Home() {
                         key={todo.id}
                         todo={todo}
                         categories={categories}
-                        onToggle={handleCompleteToggle}
-                        onDelete={handleDelete}
-                        onSave={handleEdit}
+                        handleCompleteToggle={handleCompleteToggle}
+                        handleDelete={handleDelete}
+                        handleEdit={handleEdit}
                         isManage={isManageMode}
                       />
                     ))}

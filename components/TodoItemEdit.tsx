@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TodoItem, Category } from "../types";
 import toast from "react-hot-toast";
 
+//Định dạng kiểu DL nhận được từ component cha
 interface Props {
   todo: TodoItem;
   categories: Category[];
@@ -10,21 +11,26 @@ interface Props {
 }
 
 export default function TodoItemEdit({
+  //Destructuring
   todo,
   categories,
   onSave,
   onCancel,
 }: Props) {
+  //Hiện DL công việc cần sửa vào ô sửa
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDueDate, setEditDueDate] = useState(
     todo.dueDate?.split("T")[0] || "",
   );
-  const [editDescription, setEditDescription] = useState(todo.description || "");
+  const [editDescription, setEditDescription] = useState(
+    todo.description || "",
+  );
   const [editPriority, setEditPriority] = useState(todo.priority);
   const [editCategoryId, setEditCategoryId] = useState<number | "">(
     todo.categoryId || "",
   );
 
+  //Xử lý khi bấm lưu
   const handleSave = () => {
     if (!confirm("Bạn có chắc chắn muốn lưu những sửa đổi này không?")) return;
     onSave(todo.id, {
@@ -38,6 +44,7 @@ export default function TodoItemEdit({
     toast.success("Chỉnh sửa công việc thành công!");
   };
 
+  //Css các ô nhập
   const editInputClass =
     "w-full px-3 py-2 border border-gray-500 rounded-md text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm";
 
@@ -76,8 +83,18 @@ export default function TodoItemEdit({
             <option value={2}>🟥 Cao</option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
             </svg>
           </div>
         </div>
@@ -85,7 +102,9 @@ export default function TodoItemEdit({
           <select
             value={editCategoryId}
             onChange={(e) =>
-              setEditCategoryId(e.target.value === "" ? "" : Number(e.target.value))
+              setEditCategoryId(
+                e.target.value === "" ? "" : Number(e.target.value),
+              )
             }
             className={`${editInputClass} appearance-none pr-10`}
           >
@@ -97,8 +116,18 @@ export default function TodoItemEdit({
             ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
             </svg>
           </div>
         </div>

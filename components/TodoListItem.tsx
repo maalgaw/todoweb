@@ -49,17 +49,29 @@ export default function TodoListItem({
   const renderPriorityBadge = (priority: number) => {
     switch (priority) {
       case 2:
-        return <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium border border-red-200">Cao</span>;
+        return (
+          <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium border border-red-200">
+            Cao
+          </span>
+        );
       case 1:
-        return <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium border border-yellow-200">Vừa</span>;
+        return (
+          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium border border-yellow-200">
+            Vừa
+          </span>
+        );
       case 0:
-        return <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium border border-emerald-200">Thấp</span>;
+        return (
+          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium border border-emerald-200">
+            Thấp
+          </span>
+        );
       default:
         return null;
     }
   };
 
-  //Nếu bấm vào nút sửa => hiển thị giao diện này
+  //Nếu bấm vào nút sửa => Mở giao diện sửa => Truyền vào dữ liệu cần sửa
   if (isEditing) {
     return (
       <TodoItemEdit
@@ -152,8 +164,18 @@ export default function TodoListItem({
                 className="px-3 py-1.5 bg-gray-50 text-gray-600 hover:bg-gray-200 rounded-md text-sm font-medium transition-colors border border-gray-300"
                 title="Hủy"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
               {/* Nút Xác nhận Xóa */}
@@ -165,8 +187,18 @@ export default function TodoListItem({
                 className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors border border-red-200"
                 title="Xác nhận xóa"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </button>
             </>

@@ -102,9 +102,6 @@ export default function Home() {
 
   //Xử lý khi bấm nút xoá
   async function handleDelete(id: number) {
-    const isConfirm = confirm("Bạn có chắc chắn muốn xóa công việc này không?");
-    if (!isConfirm) return;
-
     await axios.delete(`/api/todos/${id}`);
     fetchTodos();
     fetchTrashTodos();
@@ -121,11 +118,6 @@ export default function Home() {
 
   //Xử lý xoá vĩnh viễn
   async function handleHardDelete(id: number) {
-    const isConfirm = confirm(
-      "Bạn có chắc chắn muốn xóa vĩnh viễn công việc này không? Không thể khôi phục lại!",
-    );
-    if (!isConfirm) return;
-
     await axios.delete(`/api/todos/trash/${id}`);
     fetchTrashTodos();
     toast.success("Đã xoá vĩnh viễn!");

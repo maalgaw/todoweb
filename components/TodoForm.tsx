@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Category } from "../types";
 import toast from "react-hot-toast";
-//Định nghĩa kiểu dữ liệu form công việc được gửi từ component con -> cha
+import TodoListItem from "./TodoListItem";
 interface Props {
   categories: Category[];
   onAdd: (
@@ -193,6 +193,38 @@ export default function TodoForm({ categories, onAdd }: Props) {
         >
           Thêm công việc
         </button>
+
+        {/* Demo hiển thị */}
+        <div className="mt-4 pt-6 border-t border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-3 uppercase tracking-wider">
+            Demo hiển thị ở danh sách
+          </label>
+          <ul className="list-none m-0 p-0">
+            <TodoListItem
+              todo={{
+                id: -1,
+                title: newTitle.trim() || "Ví dụ: Làm bài deadline",
+                description: newDescription,
+                dueDate: newDueDate || null,
+                priority: newPriority,
+                categoryId: newCategoryId === "" ? null : newCategoryId,
+                isCompleted: false,
+                isDeleted: false,
+                isPinned: false,
+                category:
+                  newCategoryId === ""
+                    ? undefined
+                    : categories.find((c) => c.id === newCategoryId),
+              }}
+              categories={categories}
+              onToggle={() => {}}
+              onDelete={() => {}}
+              onSave={() => {}}
+              isManage={false}
+              isTrashView={false}
+            />
+          </ul>
+        </div>
       </div>
     </div>
   );

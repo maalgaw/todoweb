@@ -324,18 +324,26 @@ export default function Home() {
               {viewMode === "list" ? (
                 <div className="bg-white p-3 rounded-xl border border-gray-400 shadow-inner bg-co">
                   <ul className="space-y-4 h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
-                    {filteredTodos.map((todo) => (
-                      //Mở component hiển thị danh sách công việc
-                      <TodoListItem
-                        key={todo.id}
-                        todo={todo}
-                        categories={categories}
-                        handleCompleteToggle={handleCompleteToggle}
-                        handleDelete={handleDelete}
-                        handleEdit={handleEdit}
-                        isManage={isManageMode}
-                      />
-                    ))}
+                    {filteredTodos.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
+                        <span className="text-7xl drop-shadow-md">✨</span>
+                        <p className="text-xl font-bold text-gray-700">Chưa có công việc nào ở đây cả!</p>
+                        <p className="text-sm font-medium">Hãy thêm một vài công việc để bắt đầu ngày mới nhé.</p>
+                      </div>
+                    ) : (
+                      filteredTodos.map((todo) => (
+                        //Mở component hiển thị danh sách công việc
+                        <TodoListItem
+                          key={todo.id}
+                          todo={todo}
+                          categories={categories}
+                          handleCompleteToggle={handleCompleteToggle}
+                          handleDelete={handleDelete}
+                          handleEdit={handleEdit}
+                          isManage={isManageMode}
+                        />
+                      ))
+                    )}
                   </ul>
                 </div>
               ) : (

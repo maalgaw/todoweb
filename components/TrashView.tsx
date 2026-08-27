@@ -31,24 +31,27 @@ export default function TrashView({
 
       <div className="bg-white p-3 rounded-xl border border-gray-400 shadow-inner bg-co">
         <ul className="space-y-4 h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
-          {trashTodos.length === 0 && (
-            <p className="text-center mt-8 text-gray-500 font-medium text-lg">
-              Thùng rác trống
-            </p>
+          {trashTodos.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
+              <span className="text-7xl drop-shadow-md">🍃</span>
+              <p className="text-xl font-bold text-gray-700">Thùng rác đang trống!</p>
+              <p className="text-sm font-medium">Mọi thứ đều sạch sẽ và gọn gàng.</p>
+            </div>
+          ) : (
+            trashTodos.map((todo) => (
+              <TodoListItem
+                key={todo.id}
+                todo={todo}
+                categories={categories}
+                handleCompleteToggle={() => {}} // Không cho check khi ở trong thùng rác
+                handleDelete={handleHardDelete}
+                handleEdit={handleEdit}
+                handleRestore={() => handleRestore(todo)}
+                isManage={false}
+                isTrashView={true}
+              />
+            ))
           )}
-          {trashTodos.map((todo) => (
-            <TodoListItem
-              key={todo.id}
-              todo={todo}
-              categories={categories}
-              handleCompleteToggle={() => {}} // Không cho check khi ở trong thùng rác
-              handleDelete={handleHardDelete}
-              handleEdit={handleEdit}
-              handleRestore={() => handleRestore(todo)}
-              isManage={false}
-              isTrashView={true}
-            />
-          ))}
         </ul>
       </div>
     </motion.div>

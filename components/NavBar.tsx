@@ -1,17 +1,17 @@
 //Định nghĩa thanh navbar
 interface Props {
-  currentTab: "list" | "add" | "manage_todos" | "manage_categories";
+  currentTab: "list" | "add" | "manage_categories" | "trash";
   onTabChange: (
-    tab: "list" | "add" | "manage_todos" | "manage_categories",
+    tab: "list" | "add" | "manage_categories" | "trash",
   ) => void;
 }
 
 export default function NavBar({ currentTab, onTabChange }: Props) {
   const tabs = [
     { id: "list", label: "Danh sách công việc" },
-    { id: "manage_todos", label: "Quản lý công việc" },
     { id: "add", label: "Thêm công việc" },
     { id: "manage_categories", label: "Quản lý thẻ" },
+    { id: "trash", label: "Thùng rác" },
   ] as const;
 
   return (

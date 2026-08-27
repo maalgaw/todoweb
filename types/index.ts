@@ -9,8 +9,10 @@ export interface TodoItem {
   title: string;
   isCompleted: boolean;
   dueDate: string | null;
-  description?: string;
-  priority: number; 
-  categoryId?: number;
-  category?: Category; 
+  description?: string | null;
+  priority: number;
+  categoryId?: number | null;
+  category?: Category | null;
+  isDeleted: boolean;
+  isPinned: boolean;
 }

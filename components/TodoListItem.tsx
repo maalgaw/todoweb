@@ -25,6 +25,8 @@ interface Props {
   onDelete: (id: number) => void;
   onSave: (id: number, updatedData: TodoItem) => void;
   isManage?: boolean;
+  isTrashView?: boolean;
+  onRestore?: () => void;
 }
 
 export default function TodoListItem({
@@ -35,6 +37,8 @@ export default function TodoListItem({
   onDelete,
   onSave,
   isManage = false,
+  isTrashView = false,
+  onRestore,
 }: Props) {
   //Mặc định giao diện chỉnh sửa được tắt
   const [isEditing, setIsEditing] = useState(false);
@@ -185,9 +189,11 @@ export default function TodoListItem({
 
   //Nếu không bấm vào sửa
   return (
-    <li className="flex bg-white p-4 gap-4 items-center border border-gray-400 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
-      {/* Chỉ hiện khi ở trang quản lý công việc */}
-      {isManage === true && (
+    <li
+      className={`flex p-4 gap-4 items-center border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${todo.isPinned ? "bg-yellow-50 border-yellow-300" : "bg-white border-gray-400"}`}
+    >
+      {/* Chỉ hiện khi ở trang quản lý công việc và không ở thùng rác */}
+      {isManage === true && !isTrashView && (
         <input
           type="checkbox"
           checked={todo.isCompleted}
@@ -208,7 +214,10 @@ export default function TodoListItem({
                 : "text-gray-800 transition-all duration-200"
             }`}
           >
-            Tên: {todo.title}
+            <span className="text-xl drop-shadow-sm">
+              {todo.isPinned ? "📌" : ""}
+            </span>
+            {todo.title}
           </span>
 
           {/* Màu sắc, mức độ ưu tiên */}
@@ -259,25 +268,74 @@ export default function TodoListItem({
         )}
       </div>
 
-      {/* Chỉ hiển thị khi ở trang quản lý công việc */}
-      {isManage === true && (
+      {/* Các nút thao tác */}
+      {(isManage === true || isTrashView === true) && (
         <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-sm font-medium transition-colors border border-blue-200"
-            title="Sửa"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-            </svg>
-          </button>
+          {/* Nút Ghim (Chỉ ở trang Quản lý) */}
+          {isManage && !isTrashView && (
+            <button
+              onClick={() =>
+                onSave(todo.id, { ...todo, isPinned: !todo.isPinned })
+              }
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors border ${todo.isPinned ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200" : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-200"}`}
+              title={todo.isPinned ? "Bỏ ghim" : "Ghim"}
+            >
+              📌
+            </button>
+          )}
+
+          {/* Nút Sửa (Chỉ ở trang Quản lý) */}
+          {isManage && !isTrashView && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-sm font-medium transition-colors border border-blue-200"
+              title="Sửa"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                ></path>
+              </svg>
+            </button>
+          )}
+
+          {/* Nút Khôi phục (Chỉ ở Thùng rác) */}
+          {isTrashView && onRestore && (
+            <button
+              onClick={onRestore}
+              className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-md text-sm font-medium transition-colors border border-emerald-200"
+              title="Khôi phục"
+            >
+              🔄
+            </button>
+          )}
+
+          {/* Nút Xóa (Dùng chung cho cả Soft Delete và Hard Delete) */}
           <button
             onClick={() => onDelete(todo.id)}
             className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors border border-red-200"
-            title="Xóa"
+            title={isTrashView ? "Xóa vĩnh viễn" : "Xóa"}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              ></path>
             </svg>
           </button>
         </div>

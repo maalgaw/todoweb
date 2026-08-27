@@ -133,11 +133,8 @@ export default function Home() {
 
   //Xử lý khi ấn nút sửa
   async function handleEdit(id: number, updatedData: TodoItem) {
-    if (!confirm("Bạn có chắc chắn muốn lưu những sửa đổi này không?")) return;
-
     await axios.put(`/api/todos/${id}`, updatedData);
     fetchTodos();
-    toast.success("Chỉnh sửa công việc thành công!");
   }
 
   //Kiểm tra quá hạn

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TodoItem, Category } from "../types";
+import toast from "react-hot-toast";
 
 //Kiểm tra đến hạn trong cùng ngày hôm nay
 function isDueToday(dueDate?: string | null) {
@@ -57,6 +58,7 @@ export default function TodoListItem({
 
   //Xử lý lưu công việc sau khi sửa
   const handleSave = () => {
+    if (!confirm("Bạn có chắc chắn muốn lưu những sửa đổi này không?")) return;
     onSave(todo.id, {
       ...todo,
       title: editTitle.trim(),
@@ -66,6 +68,7 @@ export default function TodoListItem({
       categoryId: editCategoryId === "" ? undefined : editCategoryId,
     });
     setIsEditing(false);
+    toast.success("Chỉnh sửa công việc thành công!");
   };
 
   //Xử lý bấm huỷ khi đang sửa

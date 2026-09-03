@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import api from "../../lib/axiosConfig";
 import toast, { Toaster } from "react-hot-toast";
 import { calculatePasswordStrength } from "../../lib/passwordUtils";
+import NavBar from "../../components/NavBar";
 
 interface AdminUser {
   id: number;
@@ -18,13 +19,14 @@ interface AdminUser {
 }
 
 export default function AdminPage() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const passwordStrength = calculatePasswordStrength(newPassword);
   const passwordsMatch =
@@ -153,60 +155,56 @@ export default function AdminPage() {
   if (isLoading || loading)
     return <div className="text-center p-8">Đang tải...</div>;
 
+  const filteredUsers = users.filter(
+    (u) =>
+      u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())),
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       <Toaster
         position="bottom-left"
         reverseOrder={true}
         toastOptions={{ duration: 1500 }}
       />
-
-      {/* Modern Navbar */}
-      <nav className="bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-linear-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <span className="text-white font-bold">🖥️</span>
-              </div>
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                Trang Quản Trị
-              </h1>
-            </div>
-            <div className="flex gap-4 items-center">
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
-                  <span className="text-slate-300 font-bold text-xs">
-                    {user?.displayName
-                      ? user.displayName.charAt(0).toUpperCase()
-                      : user?.username?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <span className="font-medium text-slate-200 text-sm">
-                  {user?.displayName || user?.username}
-                </span>
-              </div>
-              <div className="h-6 w-px bg-slate-700 hidden sm:block"></div>
-              <button
-                onClick={logout}
-                className="bg-slate-800 text-slate-300 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300"
-              >
-                Đăng xuất
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <NavBar hideTabs={true} showDirectLogout={true} />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-            Quản lý người dùng
-          </h2>
-          <p className="text-slate-500 mt-1">
-            Xem, chỉnh sửa và phân quyền các tài khoản trong hệ thống
-          </p>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 mt-4">
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+              Quản lý người dùng
+            </h2>
+            <p className="text-slate-500 mt-1">
+              Xem, chỉnh sửa và phân quyền các tài khoản trong hệ thống
+            </p>
+          </div>
+          <div className="w-full sm:w-72">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Tìm theo username hoặc email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm"
+              />
+              <svg
+                className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
@@ -215,7 +213,7 @@ export default function AdminPage() {
               Danh sách tài khoản
             </h3>
             <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold border border-emerald-100">
-              Tổng: {users.length}
+              Tổng: {filteredUsers.length}
             </span>
           </div>
 
@@ -231,7 +229,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <tr
                     key={u.id}
                     className="hover:bg-slate-50/80 transition-colors group"

@@ -28,6 +28,8 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const passwordStrength = calculatePasswordStrength(newPassword);
   const passwordsMatch = newPassword && confirmPassword && newPassword === confirmPassword;
@@ -58,8 +60,8 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated]);
 
-  //Xử lý thay đổi avatar
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //Xử lý thay đổi avatar (Chỉ tạo preview cục bộ)
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -68,48 +70,13 @@ export default function ProfilePage() {
       return;
     }
 
-    setIsUploading(true);
-    const toastId = toast.loading("Đang tải ảnh lên...");
-
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user?.username}-${Date.now()}.${fileExt}`;
-
-      //Xoá avatar cũ
-      const oldUrl = avatarUrl || user?.avatarUrl;
-      if (oldUrl) {
-        const oldFileName = oldUrl.split("/avatars/").pop();
-        if (oldFileName) {
-          supabase.storage
-            .from("avatars")
-            .remove([oldFileName])
-            .catch(() => {});
-        }
-      }
-
-      const { error } = await supabase.storage
-        .from("avatars")
-        .upload(fileName, file);
-
-      if (error) {
-        throw error;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
-
-      setAvatarUrl(publicUrlData.publicUrl);
-      toast.success("Tải ảnh thành công!", { id: toastId });
-    } catch (error) {
-      const msg = (error as Error).message || "Lỗi khi tải ảnh lên Supabase";
-      toast.error(msg, { id: toastId });
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    // Giải phóng bộ nhớ của URL preview cũ nếu có
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
     }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
   //Xử lý cập nhật thông tin
   const handleSave = async () => {
@@ -131,10 +98,56 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
+      let finalAvatarUrl = avatarUrl; // Mặc định giữ URL cũ
+
+      // Nếu có chọn file mới -> Upload lên Supabase trước khi lưu profile
+      if (selectedFile) {
+        setIsUploading(true);
+        const toastId = toast.loading("Đang tải ảnh lên Cloud...");
+        
+        try {
+          const fileExt = selectedFile.name.split(".").pop();
+          const fileName = `${user?.username}-${Date.now()}.${fileExt}`;
+
+          // Xoá avatar cũ (nếu có)
+          const oldUrl = avatarUrl || user?.avatarUrl;
+          if (oldUrl) {
+            const oldFileName = oldUrl.split("/avatars/").pop();
+            if (oldFileName) {
+              await supabase.storage
+                .from("avatars")
+                .remove([oldFileName])
+                .catch(() => {});
+            }
+          }
+
+          const { error } = await supabase.storage
+            .from("avatars")
+            .upload(fileName, selectedFile);
+
+          if (error) throw error;
+
+          const { data: publicUrlData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(fileName);
+
+          finalAvatarUrl = publicUrlData.publicUrl;
+          setAvatarUrl(finalAvatarUrl);
+          toast.success("Tải ảnh thành công!", { id: toastId });
+        } catch (uploadError) {
+          const msg = (uploadError as Error).message || "Lỗi khi tải ảnh lên Supabase";
+          toast.error(msg, { id: toastId });
+          setIsUploading(false);
+          setIsLoading(false);
+          return; // Dừng việc lưu profile nếu tải ảnh thất bại
+        }
+        setIsUploading(false);
+      }
+
       await api.put("/api/users/profile", {
         displayName: displayName || null,
         email: email || null,
-        avatarUrl: avatarUrl || null,
+        avatarUrl: finalAvatarUrl || null,
         oldPassword: oldPassword || null,
         newPassword: newPassword || null,
       });
@@ -147,10 +160,13 @@ export default function ProfilePage() {
       });
       toast.success("Cập nhật thông tin thành công!");
 
-      // Xóa form password
+      // Xóa form và trạng thái tạm
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       const axiosError = error as {
         response?: { data?: { message?: string } };
@@ -196,12 +212,17 @@ export default function ProfilePage() {
           <div className="p-8">
             <div className="flex flex-col md:flex-row gap-10">
               {/* Cột trái: Avatar */}
-              <div className="flex flex-col items-center shrink-0">
+              <div className="flex flex-col items-center shrink-0 relative">
+                {previewUrl && (
+                  <div className="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md z-20 transform translate-x-2 -translate-y-1">
+                    CHƯA LƯU
+                  </div>
+                )}
                 <div className="w-40 h-40 rounded-full bg-emerald-100 border-4 border-emerald-500 overflow-hidden shadow-lg relative group flex items-center justify-center mb-4">
-                  {avatarUrl || user?.avatarUrl ? (
+                  {previewUrl || avatarUrl || user?.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={avatarUrl || user?.avatarUrl || ""}
+                      src={previewUrl || avatarUrl || user?.avatarUrl || ""}
                       alt="Avatar"
                       className="w-full h-full object-cover"
                     />
@@ -310,6 +331,14 @@ export default function ProfilePage() {
                         placeholder="Bỏ trống nếu không muốn đổi"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
                       />
+                      <div className="mt-2 flex justify-end">
+                        <Link
+                          href="/forgot-password"
+                          className="text-sm font-medium text-emerald-600 hover:text-emerald-500 transition-colors"
+                        >
+                          Bạn quên mật khẩu hiện tại?
+                        </Link>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

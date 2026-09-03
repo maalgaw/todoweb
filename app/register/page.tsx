@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import api from "../../lib/axiosConfig";
 import { useAuth } from "../../contexts/AuthContext";
 import { calculatePasswordStrength } from "../../lib/passwordUtils";
@@ -13,7 +14,14 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push("/");
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   const passwordStrength = calculatePasswordStrength(password);
   const passwordsMatch =

@@ -31,7 +31,7 @@ export default function TodoItemEdit({
   );
 
   //Xử lý khi bấm lưu
-  const handleSave = () => {
+  function handleSave() {
     if (!confirm("Bạn có chắc chắn muốn lưu những sửa đổi này không?")) return;
     handleEdit(todo.id, {
       ...todo,

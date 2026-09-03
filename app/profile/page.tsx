@@ -61,7 +61,7 @@ export default function ProfilePage() {
   }, [isAuthenticated]);
 
   //Xử lý thay đổi avatar (Chỉ tạo preview cục bộ)
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -79,7 +79,7 @@ export default function ProfilePage() {
     setPreviewUrl(URL.createObjectURL(file));
   };
   //Xử lý cập nhật thông tin
-  const handleSave = async () => {
+  async function handleSave() {
     if (newPassword && newPassword.includes(" ")) {
       toast.error("Mật khẩu mới không được chứa khoảng trắng");
       return;

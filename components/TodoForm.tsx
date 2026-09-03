@@ -30,7 +30,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
   }
 
   //Xử lý khi ấn thêm công việc
-  const handleAddClick = () => {
+  function handleAddClick() {
     if (newDueDate && isOverDue(newDueDate)) {
       toast.error("Hạn chót không được thiết lập trong quá khứ!");
       return;

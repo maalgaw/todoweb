@@ -20,7 +20,7 @@ export default function CategoryManager({
   const [editName, setEditName] = useState("");
 
   //Xử lý thêm thẻ
-  const handleAdd = async () => {
+  async function handleAdd() {
     if (!newCategoryName.trim()) {
       toast.error("Tên thẻ không được để trống");
       return;
@@ -36,7 +36,7 @@ export default function CategoryManager({
   };
 
   //Xử lý xoá thẻ
-  const handleDelete = async (id: number) => {
+  async function handleDelete(id: number) {
     if (
       !confirm(
         "Bạn có chắc muốn xóa thẻ này? Các công việc dùng thẻ này sẽ bị gỡ thẻ.",
@@ -53,13 +53,13 @@ export default function CategoryManager({
   };
 
   //Truyền vào ô sửa giá trị của thẻ đang sửa
-  const handleStartEdit = (category: Category) => {
+  function handleStartEdit(category: Category) {
     setEditingId(category.id);
     setEditName(category.name);
   };
 
   //Xử lý lưu sau khi sửa thẻ
-  const handleSaveEdit = async (id: number) => {
+  async function handleSaveEdit(id: number) {
     if (!editName.trim()) {
       toast.error("Tên thẻ không được để trống");
       return;

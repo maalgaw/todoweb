@@ -20,7 +20,7 @@ export default function LoginPage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
 

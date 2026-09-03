@@ -57,7 +57,7 @@ export default function AdminPage() {
     }
   }
 
-  const handleDeleteUser = async (id: number) => {
+  async function handleDeleteUser(id: number) {
     if (
       !confirm(
         "Cảnh báo: Hành động này sẽ xoá vĩnh viễn tài khoản và toàn bộ dữ liệu công việc của họ. Bạn có chắc chắn?",
@@ -74,7 +74,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleToggleRole = async (userToUpdate: AdminUser) => {
+  async function handleToggleRole(userToUpdate: AdminUser) {
     if (userToUpdate.username === user?.username) {
       toast.error("Bạn không thể tự đổi quyền của chính mình.");
       return;
@@ -98,7 +98,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleUpdateUser = async (e: React.FormEvent) => {
+  async function handleUpdateUser(e: React.FormEvent) {
     e.preventDefault();
     if (!editingUser) return;
 

@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { calculatePasswordStrength } from "../../lib/passwordUtils";
 
+// Giao diện trang thông tin tài khoản cá nhân
 export default function ProfilePage() {
   const {
     user,
@@ -43,7 +44,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     //Làm mới profile
-    const fetchProfile = async () => {
+    async function fetchProfile() {
       try {
         const response = await api.get("/api/users/profile");
         const data = response.data;

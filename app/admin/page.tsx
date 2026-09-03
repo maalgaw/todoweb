@@ -18,6 +18,7 @@ interface AdminUser {
   createdAt: string;
 }
 
+// Giao diện trang quản lý của Admin
 export default function AdminPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();

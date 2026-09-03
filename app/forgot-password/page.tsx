@@ -7,6 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Link from "next/link";
 import { calculatePasswordStrength } from "../../lib/passwordUtils";
 
+// Giao diện trang quên mật khẩu và khôi phục
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);

@@ -8,11 +8,14 @@ import { useAuth } from "../../contexts/AuthContext";
 import { calculatePasswordStrength } from "../../lib/passwordUtils";
 import { toast, Toaster } from "react-hot-toast";
 
+// Giao diện trang đăng ký tài khoản
 export default function RegisterPage() {
+  //Nội dung hiển thị ô điền thông tin mặc định là trống
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();

@@ -46,7 +46,7 @@ export default function TodoListItem({
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   //Hàm phụ hiển thị nhãn ưu tiên
-  const renderPriorityBadge = (priority: number) => {
+  function renderPriorityBadge(priority: number) {
     switch (priority) {
       case 2:
         return (

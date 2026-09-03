@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { TodoItem, Category } from "../types";
 import TodoListItem from "./TodoListItem";
 
+//Định nghĩa dữ liệu nhận từ component cha
 interface Props {
   trashTodos: TodoItem[];
   categories: Category[];
@@ -34,8 +35,12 @@ export default function TrashView({
           {trashTodos.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
               <span className="text-7xl drop-shadow-md">🍃</span>
-              <p className="text-xl font-bold text-gray-700">Thùng rác đang trống!</p>
-              <p className="text-sm font-medium">Mọi thứ đều sạch sẽ và gọn gàng.</p>
+              <p className="text-xl font-bold text-gray-700">
+                Thùng rác đang trống!
+              </p>
+              <p className="text-sm font-medium">
+                Mọi thứ đều sạch sẽ và gọn gàng.
+              </p>
             </div>
           ) : (
             trashTodos.map((todo) => (

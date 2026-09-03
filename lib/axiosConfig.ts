@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// Cấu hình Axios để tự động đính kèm Token xác thực vào mỗi yêu cầu gửi đi
 const api = axios.create({
   baseURL: 'http://localhost:5001',
 });

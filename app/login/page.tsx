@@ -7,6 +7,7 @@ import api from "../../lib/axiosConfig";
 import { useAuth } from "../../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
 
+// Giao diện trang đăng nhập
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

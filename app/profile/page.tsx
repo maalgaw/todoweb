@@ -8,6 +8,7 @@ import { supabase } from "../../lib/supabase";
 import { toast, Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { calculatePasswordStrength } from "../../lib/passwordUtils";
 
 export default function ProfilePage() {
   const {
@@ -20,12 +21,17 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  const passwordStrength = calculatePasswordStrength(newPassword);
+  const passwordsMatch = newPassword && confirmPassword && newPassword === confirmPassword;
+  const passwordsMismatch = confirmPassword && newPassword !== confirmPassword;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -34,12 +40,13 @@ export default function ProfilePage() {
   }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    // Fetch latest profile on load
+    //Làm mới profile
     const fetchProfile = async () => {
       try {
         const response = await api.get("/api/users/profile");
         const data = response.data;
         setDisplayName(data.displayName || "");
+        setEmail(data.email || "");
         setAvatarUrl(data.avatarUrl || "");
       } catch (error) {
         console.error("Failed to fetch profile", error);
@@ -51,6 +58,7 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated]);
 
+  //Xử lý thay đổi avatar
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -67,13 +75,15 @@ export default function ProfilePage() {
       const fileExt = file.name.split(".").pop();
       const fileName = `${user?.username}-${Date.now()}.${fileExt}`;
 
-      // Thử xóa ảnh cũ (nếu có) trên Supabase để tiết kiệm dung lượng
+      //Xoá avatar cũ
       const oldUrl = avatarUrl || user?.avatarUrl;
       if (oldUrl) {
         const oldFileName = oldUrl.split("/avatars/").pop();
         if (oldFileName) {
-          // Xóa ngầm ảnh cũ, không cần chờ và không cần hiện thông báo
-          supabase.storage.from("avatars").remove([oldFileName]).catch(() => {});
+          supabase.storage
+            .from("avatars")
+            .remove([oldFileName])
+            .catch(() => {});
         }
       }
 
@@ -101,8 +111,13 @@ export default function ProfilePage() {
       }
     }
   };
-
+  //Xử lý cập nhật thông tin
   const handleSave = async () => {
+    if (newPassword && newPassword.includes(" ")) {
+      toast.error("Mật khẩu mới không được chứa khoảng trắng");
+      return;
+    }
+
     if (newPassword && newPassword !== confirmPassword) {
       toast.error("Mật khẩu nhập lại không khớp");
       return;
@@ -118,6 +133,7 @@ export default function ProfilePage() {
     try {
       await api.put("/api/users/profile", {
         displayName: displayName || null,
+        email: email || null,
         avatarUrl: avatarUrl || null,
         oldPassword: oldPassword || null,
         newPassword: newPassword || null,
@@ -126,6 +142,7 @@ export default function ProfilePage() {
       // Cập nhật lại context
       updateUser({
         displayName: displayName || null,
+        email: email || null,
         avatarUrl: avatarUrl || null,
       });
       toast.success("Cập nhật thông tin thành công!");
@@ -260,6 +277,19 @@ export default function ProfilePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Địa chỉ Email
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Nhập địa chỉ Email..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -293,6 +323,19 @@ export default function ProfilePage() {
                           onChange={(e) => setNewPassword(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
                         />
+                        {newPassword && (
+                          <div className="mt-2">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-600">Độ mạnh:</span>
+                              <span className="font-semibold" style={{ color: passwordStrength.color === 'bg-red-500' ? '#ef4444' : passwordStrength.color === 'bg-orange-500' ? '#f97316' : passwordStrength.color === 'bg-yellow-500' ? '#eab308' : '#10b981' }}>
+                                {passwordStrength.label}
+                              </span>
+                            </div>
+                            <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden flex">
+                              <div className={`h-full transition-all duration-300 ${passwordStrength.color}`} style={{ width: `${(passwordStrength.score / 4) * 100}%` }}></div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -304,6 +347,12 @@ export default function ProfilePage() {
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-gray-900"
                         />
+                        {passwordsMatch && (
+                          <p className="text-xs text-emerald-600 mt-1 font-medium">✓ Trùng khớp</p>
+                        )}
+                        {passwordsMismatch && (
+                          <p className="text-xs text-red-500 mt-1 font-medium">✗ Chưa khớp</p>
+                        )}
                       </div>
                     </div>
                   </div>

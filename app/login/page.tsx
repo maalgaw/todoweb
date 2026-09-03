@@ -22,8 +22,15 @@ export default function LoginPage() {
         password,
       });
 
-      const { token, username: returnedUsername, role, displayName, avatarUrl } = response.data;
-      login(token, returnedUsername, role, displayName, avatarUrl);
+      const {
+        token,
+        username: returnedUsername,
+        email,
+        role,
+        displayName,
+        avatarUrl,
+      } = response.data;
+      login(token, returnedUsername, email, role, displayName, avatarUrl);
       toast.success("Đăng nhập thành công!");
     } catch (error) {
       const axiosError = error as {
@@ -48,7 +55,7 @@ export default function LoginPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm space-y-4">
+          <div className="rounded-md space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Tên đăng nhập
@@ -76,6 +83,15 @@ export default function LoginPage() {
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm mt-1"
                 placeholder="Mật khẩu"
               />
+            </div>
+
+            <div className="flex items-center justify-end mt-2">
+              <Link
+                href="/forgot-password"
+                className="text-sm font-medium text-emerald-600 hover:text-emerald-500"
+              >
+                Quên mật khẩu?
+              </Link>
             </div>
           </div>
 

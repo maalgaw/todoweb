@@ -4,17 +4,36 @@ import { useState } from "react";
 import Link from "next/link";
 import api from "../../lib/axiosConfig";
 import { useAuth } from "../../contexts/AuthContext";
+import { calculatePasswordStrength } from "../../lib/passwordUtils";
 import { toast, Toaster } from "react-hot-toast";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
+  const passwordStrength = calculatePasswordStrength(password);
+  const passwordsMatch =
+    password && confirmPassword && password === confirmPassword;
+  const passwordsMismatch = confirmPassword && password !== confirmPassword;
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (username.includes(" ")) {
+      toast.error("Tên đăng nhập không được để trống");
+      return;
+    }
+    if (password.includes(" ")) {
+      toast.error("Mật khẩu không được chứa khoảng trắng!");
+      return;
+    }
+    if (email.includes(" ")) {
+      toast.error("Email không được có khoảng trắng");
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast.error("Mật khẩu nhập lại không khớp!");
@@ -26,11 +45,26 @@ export default function RegisterPage() {
     try {
       const response = await api.post("/api/auth/register", {
         username,
+        email,
         password,
       });
 
-      const { token, username: returnedUsername, role, displayName, avatarUrl } = response.data;
-      login(token, returnedUsername, role, displayName, avatarUrl);
+      const {
+        token,
+        username: returnedUsername,
+        email: returnedEmail,
+        role,
+        displayName,
+        avatarUrl,
+      } = response.data;
+      login(
+        token,
+        returnedUsername,
+        returnedEmail,
+        role,
+        displayName,
+        avatarUrl,
+      );
       toast.success("Đăng ký thành công!");
     } catch (error) {
       const axiosError = error as {
@@ -55,7 +89,7 @@ export default function RegisterPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleRegister}>
-          <div className="rounded-md shadow-sm space-y-4">
+          <div className="rounded-md space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Tên đăng nhập
@@ -72,6 +106,20 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                name="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm mt-1"
+                placeholder="Địa chỉ Email"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
                 Mật khẩu (ít nhất 6 ký tự)
               </label>
               <input
@@ -84,6 +132,36 @@ export default function RegisterPage() {
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm mt-1"
                 placeholder="Mật khẩu"
               />
+              {password && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">Độ mạnh mật khẩu:</span>
+                    <span
+                      className="font-semibold"
+                      style={{
+                        color:
+                          passwordStrength.color === "bg-red-500"
+                            ? "#ef4444"
+                            : passwordStrength.color === "bg-orange-500"
+                              ? "#f97316"
+                              : passwordStrength.color === "bg-yellow-500"
+                                ? "#eab308"
+                                : "#10b981",
+                      }}
+                    >
+                      {passwordStrength.label}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden flex">
+                    <div
+                      className={`h-full transition-all duration-300 ${passwordStrength.color}`}
+                      style={{
+                        width: `${(passwordStrength.score / 4) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -98,6 +176,16 @@ export default function RegisterPage() {
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm mt-1"
                 placeholder="Xác nhận mật khẩu"
               />
+              {passwordsMatch && (
+                <p className="text-xs text-emerald-600 mt-1 font-medium">
+                  ✓ Mật khẩu trùng khớp
+                </p>
+              )}
+              {passwordsMismatch && (
+                <p className="text-xs text-red-500 mt-1 font-medium">
+                  ✗ Mật khẩu chưa khớp
+                </p>
+              )}
             </div>
           </div>
 

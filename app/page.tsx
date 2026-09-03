@@ -38,14 +38,18 @@ export default function Home() {
   //Chế độ xem: danh sách hoặc lịch
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push("/login");
+      } else if (user?.role === "Admin") {
+        router.push("/admin");
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   //Hàm cập nhật danh sách công việc
   function fetchTodos() {

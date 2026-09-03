@@ -1,10 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5001', // Đổi URL nếu port backend của bạn khác
+  baseURL: 'http://localhost:5001',
 });
 
-// Interceptor tự động kẹp Token vào mỗi request
 api.interceptors.request.use(
   (config) => {
     // Chỉ chạy ở môi trường trình duyệt (client-side)

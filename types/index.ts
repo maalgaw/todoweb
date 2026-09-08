@@ -4,6 +4,13 @@ export interface Category {
   colorHex?: string;
 }
 
+export interface TodoStep {
+  id: number;
+  title: string;
+  isCompleted: boolean;
+  todoItemId: number;
+}
+
 export interface TodoItem {
   id: number;
   title: string;
@@ -20,4 +27,5 @@ export interface TodoItem {
   recurrenceInterval?: number;
   recurrenceDaysOfWeek?: string | null;
   recurrenceEndDate?: string | null;
+  steps?: TodoStep[];
 }

@@ -9,6 +9,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { TodoItem, Category } from "../types";
 import TodoForm from "../components/TodoForm";
 import TodoListItem from "../components/TodoListItem";
+import { RecurrenceConfig } from "../components/RecurrenceSelector";
 import Sidebar from "../components/Sidebar";
 import TrashView from "../components/TrashView";
 import {
@@ -81,6 +82,7 @@ export default function Home() {
     description: string,
     priority: number,
     categoryId: number | "",
+    recurrenceConfig?: RecurrenceConfig
   ) {
     await api.post("/api/todos", {
       title,
@@ -88,6 +90,7 @@ export default function Home() {
       description,
       priority,
       categoryId: categoryId === "" ? null : categoryId,
+      ...(recurrenceConfig || {})
     });
     fetchTodos();
     toast.success("Thêm công việc thành công");
@@ -309,7 +312,7 @@ export default function Home() {
           ) : (
           <>
             <div
-              className={`bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-sm rounded-2xl p-6 md:p-8 max-w-5xl mx-auto ${!isSidebarOpen ? "mt-12" : ""}`}
+              className={`bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-sm rounded-2xl p-6 md:p-8 w-full ${!isSidebarOpen ? "mt-12" : ""}`}
             >
               <h1 className="text-2xl font-semibold mb-6 text-gray-800 tracking-tight flex items-center gap-2">
                 {getPageTitle()}
@@ -340,7 +343,7 @@ export default function Home() {
               </div>
             </div>
             
-            <div className={`max-w-5xl mx-auto ${!isSidebarOpen ? "mt-4" : "mt-4"}`}>
+            <div className={`w-full ${!isSidebarOpen ? "mt-4" : "mt-4"}`}>
               <TodoForm categories={categories} onAdd={handleAdd} />
             </div>
           </>

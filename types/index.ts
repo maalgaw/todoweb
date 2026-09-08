@@ -15,4 +15,9 @@ export interface TodoItem {
   category?: Category | null;
   isDeleted: boolean;
   isPinned: boolean;
+  isRecurring?: boolean;
+  recurrenceType?: number;
+  recurrenceInterval?: number;
+  recurrenceDaysOfWeek?: string | null;
+  recurrenceEndDate?: string | null;
 }

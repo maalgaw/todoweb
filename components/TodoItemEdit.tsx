@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TodoItem, Category } from "../types";
 import toast from "react-hot-toast";
+import { CheckIcon, XMarkIcon, CalendarIcon, HashtagIcon, FlagIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import RecurrenceSelector, { RecurrenceConfig } from "./RecurrenceSelector";
 
-//Định dạng kiểu DL nhận được từ component cha
 interface Props {
   todo: TodoItem;
   categories: Category[];
@@ -11,139 +12,237 @@ interface Props {
 }
 
 export default function TodoItemEdit({
-  //Destructuring
   todo,
   categories,
   handleEdit,
   handleCancel,
 }: Props) {
-  //Hiện DL công việc cần sửa vào ô sửa
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDueDate, setEditDueDate] = useState(
-    todo.dueDate?.split("T")[0] || "",
-  );
-  const [editDescription, setEditDescription] = useState(
-    todo.description || "",
+    todo.dueDate ? todo.dueDate.slice(0, 16) : ""
   );
   const [editPriority, setEditPriority] = useState(todo.priority);
   const [editCategoryId, setEditCategoryId] = useState<number | "">(
-    todo.categoryId || "",
+    todo.categoryId || ""
   );
 
-  //Xử lý khi bấm lưu
+  const [recurrence, setRecurrence] = useState<RecurrenceConfig>({
+    isRecurring: todo.isRecurring || false,
+    recurrenceType: todo.recurrenceType || 0,
+    recurrenceInterval: todo.recurrenceInterval || 1,
+    recurrenceDaysOfWeek: todo.recurrenceDaysOfWeek || null,
+  });
+
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+  const [isRecurrenceOpen, setIsRecurrenceOpen] = useState(false);
+
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setIsCategoryOpen(false);
+        setIsPriorityOpen(false);
+        setIsRecurrenceOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   function handleSave() {
-    if (!confirm("Bạn có chắc chắn muốn lưu những sửa đổi này không?")) return;
+    if (!editTitle.trim()) {
+      toast.error("Tên công việc không được để trống!");
+      return;
+    }
+    
+    // Check if the due date is strictly in the past, but allow editing existing past tasks if the date didn't change
+    if (editDueDate && editDueDate.slice(0, 10) !== todo.dueDate?.slice(0, 10)) {
+       if (new Date(editDueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
+         toast.error("Hạn chót không được thiết lập trong quá khứ!");
+         return;
+       }
+    }
+
     handleEdit(todo.id, {
       ...todo,
       title: editTitle.trim(),
       dueDate: editDueDate || null,
-      description: editDescription,
       priority: editPriority,
       categoryId: editCategoryId === "" ? undefined : editCategoryId,
+      isRecurring: recurrence.isRecurring,
+      recurrenceType: recurrence.recurrenceType,
+      recurrenceInterval: recurrence.recurrenceInterval,
+      recurrenceDaysOfWeek: recurrence.recurrenceDaysOfWeek,
     });
     toast.success("Chỉnh sửa công việc thành công!");
-  };
+  }
 
-  //Css các ô nhập
-  const editInputClass =
-    "w-full px-3 py-2 border border-gray-500 rounded-md text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm";
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      handleCancel();
+    }
+  }
 
   return (
-    <li className="flex bg-white p-4 items-center border border-gray-400 rounded-lg shadow-sm">
-      <div className="flex flex-col gap-3 w-full">
-        <input
-          type="text"
-          value={editTitle}
-          onChange={(event) => setEditTitle(event.target.value)}
-          className={editInputClass}
-          placeholder="Tên công việc"
-        />
-        <input
-          type="date"
-          min={new Date().toISOString().split("T")[0]}
-          value={editDueDate}
-          onChange={(event) => setEditDueDate(event.target.value)}
-          className={editInputClass}
-        />
-        <input
-          type="text"
-          placeholder="Mô tả..."
-          value={editDescription}
-          onChange={(e) => setEditDescription(e.target.value)}
-          className={editInputClass}
-        />
+    <li
+      ref={formRef}
+      className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-emerald-500 ring-1 ring-emerald-500 transition-all relative my-2 mx-2"
+    >
+      <button
+        onClick={handleSave}
+        className="text-emerald-500 hover:text-emerald-600 transition-colors shrink-0 p-1"
+        title="Lưu"
+      >
+        <CheckIcon className="w-5 h-5" />
+      </button>
+
+      <button
+        onClick={handleCancel}
+        className="text-gray-400 hover:text-red-500 transition-colors shrink-0 p-1"
+        title="Hủy"
+      >
+        <XMarkIcon className="w-5 h-5" />
+      </button>
+
+      <input
+        type="text"
+        placeholder="Tên công việc..."
+        value={editTitle}
+        onChange={(e) => setEditTitle(e.target.value)}
+        onKeyDown={handleKeyDown}
+        autoFocus
+        className="flex-1 bg-transparent border-none focus:outline-none text-sm text-gray-800 placeholder-gray-500"
+      />
+
+      <div className="flex items-center gap-1 shrink-0 relative">
+        {/* Category Dropdown */}
         <div className="relative">
-          <select
-            value={editPriority}
-            onChange={(e) => setEditPriority(Number(e.target.value))}
-            className={`${editInputClass} appearance-none pr-10`}
+          <button
+            onClick={() => {
+              setIsCategoryOpen(!isCategoryOpen);
+              setIsPriorityOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${editCategoryId ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
+            title="Thẻ phân loại"
           >
-            <option value={0}>🟩 Thấp</option>
-            <option value={1}>🟨 Vừa</option>
-            <option value={2}>🟥 Cao</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
-          </div>
+            <HashtagIcon className="w-5 h-5" />
+          </button>
+          
+          {isCategoryOpen && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 overflow-hidden">
+              <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                <button
+                  onClick={() => {
+                    setEditCategoryId("");
+                    setIsCategoryOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${editCategoryId === "" ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  Không có thẻ
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => {
+                      setEditCategoryId(c.id);
+                      setIsCategoryOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${editCategoryId === c.id ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Priority Dropdown */}
         <div className="relative">
-          <select
-            value={editCategoryId}
-            onChange={(e) =>
-              setEditCategoryId(
-                e.target.value === "" ? "" : Number(e.target.value),
-              )
-            }
-            className={`${editInputClass} appearance-none pr-10`}
+          <button
+            onClick={() => {
+              setIsPriorityOpen(!isPriorityOpen);
+              setIsCategoryOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${editPriority > 0 ? "text-amber-500 bg-amber-50" : "text-gray-500"}`}
+            title="Độ ưu tiên"
           >
-            <option value="">Không gắn thẻ</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
-          </div>
+            <FlagIcon className="w-5 h-5" />
+          </button>
+
+          {isPriorityOpen && (
+            <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
+              {[
+                { value: 0, label: "Bình thường" },
+                { value: 1, label: "Quan trọng" },
+                { value: 2, label: "Gấp" },
+              ].map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => {
+                    setEditPriority(p.value);
+                    setIsPriorityOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${editPriority === p.value ? "bg-amber-50 text-amber-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="flex gap-2 mt-1">
+
+        {/* Calendar Picker */}
+        <div className="relative">
           <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-md text-sm font-medium transition-colors shadow-sm"
+            onClick={() => {
+              dateInputRef.current?.showPicker?.();
+              setIsCategoryOpen(false);
+              setIsPriorityOpen(false);
+              setIsRecurrenceOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${editDueDate ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
+            title="Ngày đến hạn"
           >
-            Lưu
+            <CalendarIcon className="w-5 h-5" />
           </button>
+          <input
+            type="datetime-local"
+            ref={dateInputRef}
+            value={editDueDate}
+            onChange={(e) => setEditDueDate(e.target.value)}
+            className="absolute right-0 bottom-full opacity-0 pointer-events-none w-0 h-0"
+          />
+        </div>
+
+        {/* Recurrence Dropdown */}
+        <div className="relative">
           <button
-            onClick={handleCancel}
-            className="px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-md text-sm font-medium transition-colors"
+            onClick={() => {
+              setIsRecurrenceOpen(!isRecurrenceOpen);
+              setIsCategoryOpen(false);
+              setIsPriorityOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${recurrence.isRecurring ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
+            title="Lặp lại"
           >
-            Hủy
+            <ArrowPathIcon className="w-5 h-5" />
           </button>
+          
+          {isRecurrenceOpen && (
+            <RecurrenceSelector 
+               value={recurrence} 
+               onChange={setRecurrence} 
+               onClose={() => setIsRecurrenceOpen(false)} 
+            />
+          )}
         </div>
       </div>
     </li>

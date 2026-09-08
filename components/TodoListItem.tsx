@@ -8,7 +8,8 @@ import {
   PencilIcon,
   TrashIcon,
   ArrowUturnLeftIcon,
-  CalendarIcon
+  CalendarIcon,
+  ArrowPathIcon
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
 
@@ -163,7 +164,12 @@ export default function TodoListItem({
                     : "text-gray-400"
               }`}
             >
-              <CalendarIcon className="w-3.5 h-3.5 shrink-0" /> {new Date(todo.dueDate).toLocaleDateString("vi-VN")}
+              <CalendarIcon className="w-3.5 h-3.5 shrink-0" /> {new Date(todo.dueDate).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" })}
+            </span>
+          )}
+          {todo.isRecurring && (
+            <span className="text-emerald-500 flex items-center gap-1" title="Lặp lại">
+              <ArrowPathIcon className="w-3.5 h-3.5 shrink-0" />
             </span>
           )}
         </div>

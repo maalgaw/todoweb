@@ -1,7 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Category } from "../types";
 import toast from "react-hot-toast";
-import { PlusIcon, CalendarIcon, HashtagIcon, FlagIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  CalendarIcon,
+  HashtagIcon,
+  FlagIcon,
+  ArrowPathIcon
+} from "@heroicons/react/24/outline";
+import RecurrenceSelector, { RecurrenceConfig } from "./RecurrenceSelector";
 
 interface Props {
   categories: Category[];
@@ -11,6 +18,7 @@ interface Props {
     description: string,
     priority: number,
     categoryId: number | "",
+    recurrenceConfig: RecurrenceConfig
   ) => void;
 }
 
@@ -19,9 +27,17 @@ export default function TodoForm({ categories, onAdd }: Props) {
   const [newDueDate, setNewDueDate] = useState("");
   const [newPriority, setNewPriority] = useState(0);
   const [newCategoryId, setNewCategoryId] = useState<number | "">("");
-  
+
+  const [recurrence, setRecurrence] = useState<RecurrenceConfig>({
+    isRecurring: false,
+    recurrenceType: 0,
+    recurrenceInterval: 1,
+    recurrenceDaysOfWeek: null,
+  });
+
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+  const [isRecurrenceOpen, setIsRecurrenceOpen] = useState(false);
 
   const dateInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
@@ -31,6 +47,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         setIsCategoryOpen(false);
         setIsPriorityOpen(false);
+        setIsRecurrenceOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -54,13 +71,15 @@ export default function TodoForm({ categories, onAdd }: Props) {
       return;
     }
 
-    onAdd(newTitle.trim(), newDueDate, "", newPriority, newCategoryId);
+    onAdd(newTitle.trim(), newDueDate, "", newPriority, newCategoryId, recurrence);
     setNewTitle("");
     setNewDueDate("");
     setNewPriority(0);
     setNewCategoryId("");
+    setRecurrence({ isRecurring: false, recurrenceType: 0, recurrenceInterval: 1, recurrenceDaysOfWeek: null });
     setIsCategoryOpen(false);
     setIsPriorityOpen(false);
+    setIsRecurrenceOpen(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -71,7 +90,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
   }
 
   return (
-    <div 
+    <div
       ref={formRef}
       className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-200 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all relative"
     >
@@ -105,7 +124,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
           >
             <HashtagIcon className="w-5 h-5" />
           </button>
-          
+
           {isCategoryOpen && (
             <div className="absolute bottom-full right-0 mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 overflow-hidden">
               <div className="max-h-48 overflow-y-auto custom-scrollbar">
@@ -142,7 +161,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
               setIsPriorityOpen(!isPriorityOpen);
               setIsCategoryOpen(false);
             }}
-            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${newPriority > 0 ? "text-amber-500 bg-amber-50" : "text-gray-500"}`}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${newPriority == 1 ? "text-amber-500 bg-amber-50" : newPriority == 2 ? "text-red-400 bg-red-50" : "text-gray-500"}`}
             title="Độ ưu tiên"
           >
             <FlagIcon className="w-5 h-5" />
@@ -177,6 +196,7 @@ export default function TodoForm({ categories, onAdd }: Props) {
               dateInputRef.current?.showPicker?.();
               setIsCategoryOpen(false);
               setIsPriorityOpen(false);
+              setIsRecurrenceOpen(false);
             }}
             className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${newDueDate ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
             title="Ngày đến hạn"
@@ -184,13 +204,36 @@ export default function TodoForm({ categories, onAdd }: Props) {
             <CalendarIcon className="w-5 h-5" />
           </button>
           <input
-            type="date"
+            type="datetime-local"
             ref={dateInputRef}
             value={newDueDate}
-            min={new Date().toISOString().split("T")[0]}
+            min={new Date().toISOString().slice(0, 16)}
             onChange={(e) => setNewDueDate(e.target.value)}
             className="absolute right-0 top-full opacity-0 pointer-events-none w-0 h-0"
           />
+        </div>
+
+        {/* Recurrence Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setIsRecurrenceOpen(!isRecurrenceOpen);
+              setIsCategoryOpen(false);
+              setIsPriorityOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${recurrence.isRecurring ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
+            title="Lặp lại"
+          >
+            <ArrowPathIcon className="w-5 h-5" />
+          </button>
+          
+          {isRecurrenceOpen && (
+            <RecurrenceSelector 
+               value={recurrence} 
+               onChange={setRecurrence} 
+               onClose={() => setIsRecurrenceOpen(false)} 
+            />
+          )}
         </div>
       </div>
     </div>

@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    //Kiểm tra xem đã đăng nhập hay chưa
     function initAuth() {
       const storedToken = localStorage.getItem("token");
       const storedUsername = localStorage.getItem("username");
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedRole = localStorage.getItem("role");
       const storedDisplayName = localStorage.getItem("displayName");
       const storedAvatarUrl = localStorage.getItem("avatarUrl");
-
+      //Nếu đăng nhập rồi, lưu token vào hook
       if (storedToken && storedUsername && storedRole) {
         setToken(storedToken);
         setUser({
@@ -98,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       router.push("/");
     }
-  };
+  }
 
   function logout() {
     localStorage.removeItem("token");
@@ -110,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUser(null);
     router.push("/login"); // Đăng xuất xong bị văng về trang đăng nhập
-  };
+  }
 
   function updateUser(data: {
     displayName?: string | null;
@@ -135,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return newUser;
     });
-  };
+  }
 
   return (
     <AuthContext.Provider
@@ -145,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         updateUser,
+        //Nếu trong token trong hook chứa dữ liệu => isAuthenticated = true
         isAuthenticated: !!token,
         isLoading,
       }}

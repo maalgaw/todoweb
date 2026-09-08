@@ -43,7 +43,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated) {
+      //Nếu isAuthenticated = false -> Quay về trang đăng nhập
+      if (isAuthenticated === false) {
         router.push("/login");
       } else if (user?.role === "Admin") {
         router.push("/admin");
@@ -196,7 +197,11 @@ export default function Home() {
       <div className="w-full px-4 sm:px-6 md:px-10 mt-8 mb-20">
         {/* Hộp thông báo của react-hot-toast */}
         <div>
-          <Toaster position="bottom-left" reverseOrder={true} toastOptions={{ duration: 1500 }} />
+          <Toaster
+            position="bottom-left"
+            reverseOrder={true}
+            toastOptions={{ duration: 1500 }}
+          />
         </div>
         {/* Giao diện trang web thay đổi khi mở từ nav bar */}
         <AnimatePresence mode="wait">
@@ -331,8 +336,12 @@ export default function Home() {
                     {filteredTodos.length === 0 ? (
                       <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
                         <span className="text-7xl drop-shadow-md">✨</span>
-                        <p className="text-xl font-bold text-gray-700">Chưa có công việc nào ở đây cả!</p>
-                        <p className="text-sm font-medium">Hãy thêm một vài công việc để bắt đầu ngày mới nhé.</p>
+                        <p className="text-xl font-bold text-gray-700">
+                          Chưa có công việc nào ở đây cả!
+                        </p>
+                        <p className="text-sm font-medium">
+                          Hãy thêm một vài công việc để bắt đầu ngày mới nhé.
+                        </p>
                       </div>
                     ) : (
                       filteredTodos.map((todo) => (

@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
     newPassword && confirmPassword && newPassword === confirmPassword;
   const passwordsMismatch = confirmPassword && newPassword !== confirmPassword;
 
-  async function handleSendOtp(e: React.FormEvent) {
+  async function handleSendOtp(e: React.SubmitEvent) {
     e.preventDefault();
     if (!email) {
       toast.error("Vui lòng nhập email");
@@ -44,9 +44,9 @@ export default function ForgotPasswordPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
-  async function handleResetPassword(e: React.FormEvent) {
+  async function handleResetPassword(e: React.SubmitEvent) {
     e.preventDefault();
     if (!otp || !newPassword || !confirmPassword) {
       toast.error("Vui lòng nhập đủ thông tin");
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

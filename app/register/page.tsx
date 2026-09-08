@@ -31,7 +31,7 @@ export default function RegisterPage() {
     password && confirmPassword && password === confirmPassword;
   const passwordsMismatch = confirmPassword && password !== confirmPassword;
 
-  async function handleRegister(event: React.FormEvent) {
+  async function handleRegister(event: React.SubmitEvent) {
     event.preventDefault();
     if (username.includes(" ")) {
       toast.error("Tên đăng nhập không được để trống");

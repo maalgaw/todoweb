@@ -21,7 +21,7 @@ export default function LoginPage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.SubmitEvent) {
     e.preventDefault();
     setIsLoading(true);
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[20px_20px]">

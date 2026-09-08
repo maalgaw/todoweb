@@ -73,7 +73,7 @@ export default function AdminPage() {
     } catch {
       toast.error("Không thể xoá tài khoản.");
     }
-  };
+  }
 
   async function handleToggleRole(userToUpdate: AdminUser) {
     if (userToUpdate.username === user?.username) {
@@ -97,9 +97,9 @@ export default function AdminPage() {
     } catch {
       toast.error("Cập nhật quyền thất bại.");
     }
-  };
+  }
 
-  async function handleUpdateUser(e: React.FormEvent) {
+  async function handleUpdateUser(e: React.SubmitEvent) {
     e.preventDefault();
     if (!editingUser) return;
 
@@ -151,7 +151,7 @@ export default function AdminPage() {
         "Cập nhật thông tin thất bại.";
       toast.error(errorMessage);
     }
-  };
+  }
 
   if (isLoading || loading)
     return <div className="text-center p-8">Đang tải...</div>;

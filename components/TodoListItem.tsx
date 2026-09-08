@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { TodoItem, Category } from "../types";
 import TodoItemEdit from "./TodoItemEdit";
+import { 
+  XMarkIcon,
+  CheckIcon,
+  BookmarkIcon,
+  PencilIcon,
+  TrashIcon,
+  ArrowUturnLeftIcon,
+  CalendarIcon
+} from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
 
 //Kiểm tra đến hạn trong cùng ngày hôm nay
 function isDueToday(dueDate?: string | null) {
@@ -25,7 +35,7 @@ interface Props {
   handleCompleteToggle: (todo: TodoItem) => void;
   handleDelete: (id: number) => void;
   handleEdit: (id: number, updatedData: TodoItem) => void;
-  isManage?: boolean;
+
   isTrashView?: boolean;
   handleRestore?: () => void;
 }
@@ -37,7 +47,7 @@ export default function TodoListItem({
   handleCompleteToggle,
   handleDelete,
   handleEdit,
-  isManage = false,
+
   isTrashView = false,
   handleRestore,
 }: Props) {
@@ -45,31 +55,40 @@ export default function TodoListItem({
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
-  //Hàm phụ hiển thị nhãn ưu tiên
+  //Hàm phụ hiển thị nhãn ưu tiên (Dạng dấu chấm nhỏ gọn)
   function renderPriorityBadge(priority: number) {
     switch (priority) {
       case 2:
         return (
-          <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium border border-red-200">
-            Cao
+          <span
+            className="flex items-center text-xs text-red-500 gap-1"
+            title="Độ ưu tiên: Cao"
+          >
+            <span className="w-2 h-2 rounded-full bg-red-500"></span>
           </span>
         );
       case 1:
         return (
-          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium border border-yellow-200">
-            Vừa
+          <span
+            className="flex items-center text-xs text-yellow-500 gap-1"
+            title="Độ ưu tiên: Vừa"
+          >
+            <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
           </span>
         );
       case 0:
         return (
-          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium border border-emerald-200">
-            Thấp
+          <span
+            className="flex items-center text-xs text-emerald-500 gap-1"
+            title="Độ ưu tiên: Thấp"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
           </span>
         );
       default:
         return null;
     }
-  };
+  }
 
   //Nếu bấm vào nút sửa => hiển thị giao diện này
   if (isEditing) {
@@ -89,16 +108,15 @@ export default function TodoListItem({
   //Nếu không bấm vào sửa
   return (
     <li
-      className={`flex p-4 gap-4 items-center border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${todo.isPinned ? "bg-yellow-50 border-yellow-300" : "bg-white border-gray-400"}`}
+      className={`flex py-3 px-2 gap-3 items-center border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 group ${todo.isPinned ? "bg-yellow-50/30" : "bg-white"}`}
     >
-      {/* Chỉ hiện khi ở trang quản lý công việc và không ở thùng rác */}
-      {isManage === true && !isTrashView && (
+      {/* Chỉ hiện khi không ở thùng rác */}
+      {!isTrashView && (
         <input
           type="checkbox"
           checked={todo.isCompleted}
-          disabled={!isManage}
           onChange={() => handleCompleteToggle(todo)}
-          className="appearance-none w-6 h-6 border-2 border-gray-400 rounded flex items-center justify-center bg-white cursor-pointer transition-transform hover:scale-110 checked:bg-green-600 checked:border-green-600 after:content-['✔'] after:text-white after:text-sm after:hidden checked:after:block disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="appearance-none w-6 h-6 border-2 border-gray-300 rounded-full flex shrink-0 items-center justify-center bg-white cursor-pointer transition-all hover:border-emerald-500 checked:bg-emerald-500 checked:border-emerald-500 after:content-['✔'] after:text-white after:text-xs after:font-bold after:hidden checked:after:block disabled:opacity-50 disabled:cursor-not-allowed"
         />
       )}
 
@@ -107,55 +125,53 @@ export default function TodoListItem({
         <div className="flex gap-2 items-center flex-wrap mb-1">
           {/* Tên việc */}
           <span
-            className={`text-lg font-medium truncate ${
+            className={`text-base truncate flex items-center ${
               todo.isCompleted
                 ? "text-gray-400 line-through transition-all duration-200"
-                : "text-gray-800 transition-all duration-200"
+                : "text-gray-800 font-medium transition-all duration-200"
             }`}
           >
-            <span className="text-xl drop-shadow-sm">
-              {todo.isPinned ? "📌" : ""}
-            </span>
+            {todo.isPinned ? <BookmarkIconSolid className="w-4 h-4 mr-1.5 text-yellow-500 shrink-0" /> : null}
             {todo.title}
           </span>
 
           {/* Màu sắc, mức độ ưu tiên */}
           {renderPriorityBadge(todo.priority)}
 
-          {/* Thẻ côgn việc */}
+          {/* Thẻ công việc */}
           {todo.category && (
-            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium border border-gray-400 flex items-center gap-1">
-              🏷️ {todo.category.name}
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              #{todo.category.name}
             </span>
           )}
         </div>
 
-        {/* Mô tả */}
-        {todo.description && (
-          <p className="text-sm text-gray-500 truncate mb-1">
-            Mô tả: {todo.description}
-          </p>
-        )}
-        {/* Hạn - deadline */}
-        {todo.dueDate && (
-          <span
-            className={`text-xs font-medium ${
-              isOverDue(todo.dueDate) && !todo.isCompleted
-                ? "text-red-500"
-                : isDueToday(todo.dueDate) && !todo.isCompleted
-                  ? "text-orange-500"
-                  : "text-gray-400"
-            }`}
-          >
-            Hạn: {new Date(todo.dueDate).toLocaleDateString("vi-VN")}{" "}
-            {isDueToday(todo.dueDate) && !todo.isCompleted && "(Sắp đến hạn)"}
-          </span>
-        )}
+        {/* Mô tả & Hạn (Hiển thị chung một dòng cho gọn) */}
+        <div className="flex items-center gap-3 text-xs mt-0.5">
+          {todo.description && (
+            <span className="text-gray-500 truncate max-w-50">
+              {todo.description}
+            </span>
+          )}
+          {todo.dueDate && (
+            <span
+              className={`flex items-center gap-1 ${
+                isOverDue(todo.dueDate) && !todo.isCompleted
+                  ? "text-red-500"
+                  : isDueToday(todo.dueDate) && !todo.isCompleted
+                    ? "text-orange-500"
+                    : "text-gray-400"
+              }`}
+            >
+              <CalendarIcon className="w-3.5 h-3.5 shrink-0" /> {new Date(todo.dueDate).toLocaleDateString("vi-VN")}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Các nút thao tác */}
-      {(isManage === true || isTrashView === true) && (
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-center space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
           {isConfirmingDelete ? (
             <>
               {/* Nút Hủy Xóa */}
@@ -164,19 +180,7 @@ export default function TodoListItem({
                 className="px-3 py-1.5 bg-gray-50 text-gray-600 hover:bg-gray-200 rounded-md text-sm font-medium transition-colors border border-gray-300"
                 title="Hủy"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <XMarkIcon className="w-4 h-4" />
               </button>
               {/* Nút Xác nhận Xóa */}
               <button
@@ -187,56 +191,36 @@ export default function TodoListItem({
                 className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors border border-red-200"
                 title="Xác nhận xóa"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+                <CheckIcon className="w-4 h-4" />
               </button>
             </>
           ) : (
             <>
               {/* Nút Ghim (Chỉ ở trang Quản lý) */}
-              {isManage && !isTrashView && (
+              {!isTrashView && (
                 <button
                   onClick={() =>
                     handleEdit(todo.id, { ...todo, isPinned: !todo.isPinned })
                   }
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors border ${todo.isPinned ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200" : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-200"}`}
+                  className={`p-1.5 rounded transition-colors ${todo.isPinned ? "text-yellow-600 bg-yellow-50" : "text-gray-400 hover:text-yellow-600 hover:bg-yellow-50"}`}
                   title={todo.isPinned ? "Bỏ ghim" : "Ghim"}
                 >
-                  📌
+                  {todo.isPinned ? (
+                    <BookmarkIconSolid className="w-4 h-4" />
+                  ) : (
+                    <BookmarkIcon className="w-4 h-4" />
+                  )}
                 </button>
               )}
 
               {/* Nút Sửa (Chỉ ở trang Quản lý) */}
-              {isManage && !isTrashView && (
+              {!isTrashView && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-sm font-medium transition-colors border border-blue-200"
+                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                   title="Sửa"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    ></path>
-                  </svg>
+                  <PencilIcon className="w-4 h-4" />
                 </button>
               )}
 
@@ -247,34 +231,21 @@ export default function TodoListItem({
                   className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-md text-sm font-medium transition-colors border border-emerald-200"
                   title="Khôi phục"
                 >
-                  🔄
+                  <ArrowUturnLeftIcon className="w-4 h-4" />
                 </button>
               )}
 
               {/* Nút Xóa (Dùng chung cho cả Soft Delete và Hard Delete) */}
               <button
                 onClick={() => setIsConfirmingDelete(true)}
-                className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors border border-red-200"
+                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                 title={isTrashView ? "Xóa vĩnh viễn" : "Xóa"}
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
+                <TrashIcon className="w-4 h-4" />
               </button>
             </>
           )}
         </div>
-      )}
     </li>
   );
 }

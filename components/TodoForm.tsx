@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Category } from "../types";
 import toast from "react-hot-toast";
-import TodoListItem from "./TodoListItem";
+import { PlusIcon, CalendarIcon, HashtagIcon, FlagIcon } from "@heroicons/react/24/outline";
+
 interface Props {
   categories: Category[];
   onAdd: (
@@ -14,14 +15,28 @@ interface Props {
 }
 
 export default function TodoForm({ categories, onAdd }: Props) {
-  //Mặc định ở các ô điền thông tin tạo mới côgn việc là rỗng
   const [newTitle, setNewTitle] = useState("");
   const [newDueDate, setNewDueDate] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newPriority, setNewPriority] = useState(1);
+  const [newPriority, setNewPriority] = useState(0);
   const [newCategoryId, setNewCategoryId] = useState<number | "">("");
+  
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
-  //Hàm so sánh hạn chót
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setIsCategoryOpen(false);
+        setIsPriorityOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   function isOverDue(dueDate?: string | null) {
     if (!dueDate) return false;
     return (
@@ -29,201 +44,153 @@ export default function TodoForm({ categories, onAdd }: Props) {
     );
   }
 
-  //Xử lý khi ấn thêm công việc
-  function handleAddClick() {
-    if (newDueDate && isOverDue(newDueDate)) {
-      toast.error("Hạn chót không được thiết lập trong quá khứ!");
-      return;
-    }
+  function handleAdd() {
     if (!newTitle.trim()) {
       toast.error("Tên công việc không được để trống!");
       return;
     }
+    if (newDueDate && isOverDue(newDueDate)) {
+      toast.error("Hạn chót không được thiết lập trong quá khứ!");
+      return;
+    }
 
-    onAdd(
-      newTitle.trim(),
-      newDueDate,
-      newDescription,
-      newPriority,
-      newCategoryId,
-    );
-
-    //Reset form sau khi thêm
+    onAdd(newTitle.trim(), newDueDate, "", newPriority, newCategoryId);
     setNewTitle("");
     setNewDueDate("");
-    setNewDescription("");
-    setNewPriority(1);
+    setNewPriority(0);
     setNewCategoryId("");
-  };
+    setIsCategoryOpen(false);
+    setIsPriorityOpen(false);
+  }
 
-  //CSS các ô điền
-  const inputClass =
-    "w-full px-4 py-2.5 bg-gray-50 border border-gray-400 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all";
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAdd();
+    }
+  }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl border border-gray-400 shadow-sm mb-8">
-      <div className="flex flex-col gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Tên công việc <span className="text-red-500">*</span>
-          </label>
-          {/* Nhập tên cônng việc */}
-          <input
-            type="text"
-            placeholder="Ví dụ: Làm bài deadline"
-            value={newTitle}
-            onChange={(event) => setNewTitle(event.target.value)}
-            onKeyDown={(event) => event.key === "Enter" && handleAddClick()}
-            className={inputClass}
-          />
-        </div>
+    <div 
+      ref={formRef}
+      className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-200 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all relative"
+    >
+      <button
+        onClick={handleAdd}
+        className="text-emerald-500 hover:text-emerald-600 transition-colors shrink-0"
+        title="Thêm công việc"
+      >
+        <PlusIcon className="w-5 h-5" />
+      </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Hạn chót
-            </label>
-            {/* Nhập hạn chót */}
-            <input
-              type="date"
-              min={new Date().toISOString().split("T")[0]}
-              value={newDueDate}
-              onChange={(event) => setNewDueDate(event.target.value)}
-              className={inputClass}
-            />
-          </div>
+      <input
+        type="text"
+        placeholder="Thêm công việc..."
+        value={newTitle}
+        onChange={(e) => setNewTitle(e.target.value)}
+        onKeyDown={handleKeyDown}
+        className="flex-1 bg-transparent border-none focus:outline-none text-sm text-gray-800 placeholder-gray-500"
+      />
 
-          <div>
-            {/* Chọn thẻ phân loại */}
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Thẻ phân loại
-            </label>
-            <div className="relative">
-              <select
-                value={newCategoryId}
-                onChange={(e) =>
-                  setNewCategoryId(
-                    e.target.value === "" ? "" : Number(e.target.value),
-                  )
-                }
-                className={`${inputClass} appearance-none pr-10`}
-              >
-                <option value="">Không gắn thẻ</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+      <div className="flex items-center gap-1 shrink-0 relative">
+        {/* Category Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setIsCategoryOpen(!isCategoryOpen);
+              setIsPriorityOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${newCategoryId ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
+            title="Thẻ phân loại"
+          >
+            <HashtagIcon className="w-5 h-5" />
+          </button>
+          
+          {isCategoryOpen && (
+            <div className="absolute bottom-full right-0 mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 overflow-hidden">
+              <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                <button
+                  onClick={() => {
+                    setNewCategoryId("");
+                    setIsCategoryOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${newCategoryId === "" ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
+                  Không có thẻ
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => {
+                      setNewCategoryId(c.id);
+                      setIsCategoryOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${newCategoryId === c.id ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div>
-          {/* Chọn mức độ ưu tiên */}
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Mức độ ưu tiên
-          </label>
-          <div className="relative">
-            <select
-              value={newPriority}
-              onChange={(e) => setNewPriority(Number(e.target.value))}
-              className={`${inputClass} appearance-none pr-10`}
-            >
-              <option value={0}>🟩 Ưu tiên thấp</option>
-              <option value={1}>🟨 Ưu tiên trung bình</option>
-              <option value={2}>🟥 Ưu tiên cao</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Mô tả chi tiết
-          </label>
-          {/* Nhập mô tả công việc */}
-          <textarea
-            placeholder="Nhập ghi chú hoặc mô tả chi tiết..."
-            value={newDescription}
-            onChange={(e) => {
-              setNewDescription(e.target.value);
-              // Tự động resize chiều cao dựa vào nội dung (scroll height)
-              e.target.style.height = "auto";
-              e.target.style.height = `${e.target.scrollHeight}px`;
+        {/* Priority Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setIsPriorityOpen(!isPriorityOpen);
+              setIsCategoryOpen(false);
             }}
-            rows={3}
-            className={`${inputClass}`}
-          />
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${newPriority > 0 ? "text-amber-500 bg-amber-50" : "text-gray-500"}`}
+            title="Độ ưu tiên"
+          >
+            <FlagIcon className="w-5 h-5" />
+          </button>
+
+          {isPriorityOpen && (
+            <div className="absolute bottom-full right-0 mb-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
+              {[
+                { value: 0, label: "Bình thường" },
+                { value: 1, label: "Quan trọng" },
+                { value: 2, label: "Gấp" },
+              ].map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => {
+                    setNewPriority(p.value);
+                    setIsPriorityOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${newPriority === p.value ? "bg-amber-50 text-amber-700 font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Nút thêm công việc */}
-        <button
-          onClick={handleAddClick}
-          className="w-full mt-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-        >
-          Thêm công việc
-        </button>
-
-        {/* Demo hiển thị */}
-        <div className="mt-4 pt-6 border-t border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-3 uppercase tracking-wider">
-            Demo hiển thị:
-          </label>
-          <ul className="list-none m-0 p-0">
-            <TodoListItem
-              todo={{
-                id: -1,
-                title: newTitle.trim() || "Ví dụ: Làm bài deadline",
-                description: newDescription,
-                dueDate: newDueDate || null,
-                priority: newPriority,
-                categoryId: newCategoryId === "" ? null : newCategoryId,
-                isCompleted: false,
-                isDeleted: false,
-                isPinned: false,
-                category:
-                  newCategoryId === ""
-                    ? undefined
-                    : categories.find((c) => c.id === newCategoryId),
-              }}
-              categories={categories}
-              handleCompleteToggle={() => {}}
-              handleDelete={() => {}}
-              handleEdit={() => {}}
-              isManage={false}
-              isTrashView={false}
-            />
-          </ul>
+        {/* Calendar Picker */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              dateInputRef.current?.showPicker?.();
+              setIsCategoryOpen(false);
+              setIsPriorityOpen(false);
+            }}
+            className={`p-1.5 rounded-md hover:bg-gray-100 transition-colors ${newDueDate ? "text-emerald-600 bg-emerald-50" : "text-gray-500"}`}
+            title="Ngày đến hạn"
+          >
+            <CalendarIcon className="w-5 h-5" />
+          </button>
+          <input
+            type="date"
+            ref={dateInputRef}
+            value={newDueDate}
+            min={new Date().toISOString().split("T")[0]}
+            onChange={(e) => setNewDueDate(e.target.value)}
+            className="absolute right-0 top-full opacity-0 pointer-events-none w-0 h-0"
+          />
         </div>
       </div>
     </div>

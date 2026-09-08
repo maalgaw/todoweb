@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import api from "../../lib/axiosConfig";
 import toast, { Toaster } from "react-hot-toast";
 import { calculatePasswordStrength } from "../../lib/passwordUtils";
-import NavBar from "../../components/NavBar";
+import { MagnifyingGlassIcon, ArrowRightOnRectangleIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 interface AdminUser {
   id: number;
@@ -20,7 +20,7 @@ interface AdminUser {
 
 // Giao diện trang quản lý của Admin
 export default function AdminPage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -169,7 +169,6 @@ export default function AdminPage() {
         reverseOrder={true}
         toastOptions={{ duration: 1500 }}
       />
-      <NavBar hideTabs={true} showDirectLogout={true} />
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 mt-4">
@@ -182,8 +181,8 @@ export default function AdminPage() {
               Xem, chỉnh sửa và phân quyền các tài khoản trong hệ thống
             </p>
           </div>
-          <div className="w-full sm:w-72">
-            <div className="relative">
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+            <div className="relative w-full sm:w-72">
               <input
                 type="text"
                 placeholder="Tìm theo username hoặc email..."
@@ -191,20 +190,15 @@ export default function AdminPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm"
               />
-              <svg
-                className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <MagnifyingGlassIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition-colors text-sm w-full sm:w-auto flex items-center justify-center gap-2"
+            >
+              <ArrowRightOnRectangleIcon className="w-4 h-4" />
+              Đăng xuất
+            </button>
           </div>
         </div>
 
@@ -437,37 +431,13 @@ export default function AdminPage() {
                   />
                   {passwordsMatch && (
                     <p className="text-xs text-emerald-600 mt-2 font-semibold flex items-center gap-1">
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
+                      <CheckCircleIcon className="w-3.5 h-3.5" />
                       Mật khẩu trùng khớp
                     </p>
                   )}
                   {passwordsMismatch && (
                     <p className="text-xs text-rose-500 mt-2 font-semibold flex items-center gap-1">
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      <XCircleIcon className="w-3.5 h-3.5" />
                       Mật khẩu chưa khớp
                     </p>
                   )}

@@ -5,45 +5,37 @@ import api from "../lib/axiosConfig";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { TodoItem, Category } from "../types";
 import TodoForm from "../components/TodoForm";
-import FilterBar from "../components/FilterBar";
 import TodoListItem from "../components/TodoListItem";
-import NavBar from "../components/NavBar";
-import CategoryManager from "../components/CategoryManager";
+import Sidebar from "../components/Sidebar";
 import TrashView from "../components/TrashView";
-//import TodoCalendar from "../components/TodoCalendar";
+import {
+  SunIcon,
+  StarIcon,
+  PlayCircleIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  HashtagIcon,
+  SparklesIcon,
+  Bars3Icon,
+} from "@heroicons/react/24/outline";
 
 export default function Home() {
-  //Lưu trữ tạm thời dữ liệu các công việc và thẻ
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [trashTodos, setTrashTodos] = useState<TodoItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  //Bộ lọc mặc định khi vào là all - tất cả
-  const [filter, setFilter] = useState("all");
-
-  //Bộ lọc tìm kiếm mặc định là rỗng
+  const [filter, setFilter] = useState("doing");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  //Lưu trữ giá trị tạm thời của NavBar
-  type Tab = "list" | "add" | "manage_categories" | "trash";
-  //Mặc định là list - danh sách công việc
-  const [currentTab, setCurrentTab] = useState<Tab>("list");
-
-  //Chế độ sửa
-  const [isManageMode, setIsManageMode] = useState(false);
-
-  //Chế độ xem: danh sách hoặc lịch
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
-      //Nếu isAuthenticated = false -> Quay về trang đăng nhập
       if (isAuthenticated === false) {
         router.push("/login");
       } else if (user?.role === "Admin") {
@@ -52,7 +44,6 @@ export default function Home() {
     }
   }, [isLoading, isAuthenticated, user, router]);
 
-  //Hàm cập nhật danh sách công việc
   function fetchTodos() {
     api
       .get("/api/todos")
@@ -60,7 +51,6 @@ export default function Home() {
       .catch(() => toast.error("Không thể kết nối server API công việc"));
   }
 
-  //Hàm cập nhật danh sách thẻ
   function fetchCategories() {
     api
       .get("/api/categories")
@@ -68,7 +58,6 @@ export default function Home() {
       .catch(() => toast.error("Không thể tải danh sách thẻ"));
   }
 
-  //Hàm cập nhật danh sách thùng rác
   function fetchTrashTodos() {
     api
       .get("/api/todos/trash")
@@ -76,20 +65,16 @@ export default function Home() {
       .catch(() => toast.error("Không thể tải danh sách thùng rác"));
   }
 
-  //Hook lấy dữ liệu lần đầu vào trang
   useEffect(() => {
     fetchTodos();
     fetchCategories();
     fetchTrashTodos();
     if (!sessionStorage.getItem("welcomeShown")) {
-      toast("Chào mừng đến với app quản lý công việc!", {
-        icon: "🎉",
-      });
+      toast("Chào mừng đến với app quản lý công việc!", { icon: "🎉" });
       sessionStorage.setItem("welcomeShown", "true");
     }
   }, []);
 
-  //Xử lý khi ấn nút thêm
   async function handleAdd(
     title: string,
     dueDate: string,
@@ -106,10 +91,8 @@ export default function Home() {
     });
     fetchTodos();
     toast.success("Thêm công việc thành công");
-    setCurrentTab("list");
   }
 
-  //Xử lý khi ấn vào ô đánh dấu công việc
   async function handleCompleteToggle(todo: TodoItem) {
     await api.put(`/api/todos/${todo.id}`, {
       ...todo,
@@ -119,7 +102,6 @@ export default function Home() {
     toast.success("Chỉnh sửa trạng thái công việc thành công!");
   }
 
-  //Xử lý khi bấm nút xoá
   async function handleDelete(id: number) {
     await api.delete(`/api/todos/${id}`);
     fetchTodos();
@@ -127,7 +109,6 @@ export default function Home() {
     toast.success("Đã đưa công việc vào thùng rác!");
   }
 
-  //Xử lý khôi phục công việc
   async function handleRestore(todo: TodoItem) {
     await api.put(`/api/todos/${todo.id}`, { ...todo, isDeleted: false });
     fetchTodos();
@@ -135,20 +116,56 @@ export default function Home() {
     toast.success("Đã khôi phục công việc!");
   }
 
-  //Xử lý xoá vĩnh viễn
   async function handleHardDelete(id: number) {
     await api.delete(`/api/todos/trash/${id}`);
     fetchTrashTodos();
     toast.success("Đã xoá vĩnh viễn!");
   }
 
-  //Xử lý khi ấn nút sửa
   async function handleEdit(id: number, updatedData: TodoItem) {
     await api.put(`/api/todos/${id}`, updatedData);
     fetchTodos();
   }
 
-  //Kiểm tra quá hạn
+  async function handleAddCategory(name: string) {
+    try {
+      await api.post("/api/categories", { name });
+      fetchCategories();
+      toast.success("Thêm thẻ thành công");
+    } catch {
+      toast.error("Lỗi khi thêm thẻ");
+    }
+  }
+
+  async function handleEditCategory(id: number, name: string) {
+    try {
+      await api.put(`/api/categories/${id}`, { id, name });
+      fetchCategories();
+      fetchTodos();
+      toast.success("Cập nhật thẻ thành công");
+    } catch {
+      toast.error("Lỗi khi cập nhật thẻ");
+    }
+  }
+
+  async function handleDeleteCategory(id: number) {
+    if (
+      !confirm(
+        "Bạn có chắc muốn xóa thẻ này? Các công việc dùng thẻ này sẽ bị gỡ thẻ.",
+      )
+    )
+      return;
+    try {
+      await api.delete(`/api/categories/${id}`);
+      fetchCategories();
+      fetchTodos();
+      if (filter === `category_${id}`) setFilter("today");
+      toast.success("Đã xóa thẻ");
+    } catch {
+      toast.error("Lỗi khi xóa thẻ");
+    }
+  }
+
   function isOverDue(dueDate?: string | null) {
     if (!dueDate) return false;
     return (
@@ -156,7 +173,13 @@ export default function Home() {
     );
   }
 
-  //Lọc & tìm kiếm
+  function isDueToday(dueDate?: string | null) {
+    if (!dueDate) return false;
+    return (
+      new Date(dueDate).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0)
+    );
+  }
+
   const filteredTodos = todos.filter((todo) => {
     if (
       searchQuery &&
@@ -170,18 +193,65 @@ export default function Home() {
       return todo.isCompleted === true;
     } else if (filter === "overdue") {
       return todo.isCompleted === false && isOverDue(todo.dueDate);
+    } else if (filter === "today") {
+      return isDueToday(todo.dueDate);
+    } else if (filter === "important") {
+      return todo.isPinned === true;
+    } else if (filter.startsWith("category_")) {
+      const catId = Number(filter.split("_")[1]);
+      return todo.categoryId === catId;
     }
-    return true;
+    return true; // all
   });
 
-  //Đếm số công việc chưa hoàn thành
-  const activeCount = todos.filter(
-    (todo) => todo.isCompleted === false && !isOverDue(todo.dueDate),
-  ).length;
-
-  // Thống kê chung
-  const totalCount = todos.length;
-  const completedCount = todos.filter((t) => t.isCompleted).length;
+  const getPageTitle = () => {
+    switch (filter) {
+      case "today":
+        return (
+          <>
+            <SunIcon className="w-6 h-6 text-orange-500" /> Trong ngày
+          </>
+        );
+      case "important":
+        return (
+          <>
+            <StarIcon className="w-6 h-6 text-yellow-500" /> Quan trọng
+          </>
+        );
+      case "doing":
+        return (
+          <>
+            <PlayCircleIcon className="w-6 h-6 text-blue-500" /> Đang làm
+          </>
+        );
+      case "completed":
+        return (
+          <>
+            <CheckCircleIcon className="w-6 h-6 text-green-500" /> Đã hoàn thành
+          </>
+        );
+      case "overdue":
+        return (
+          <>
+            <ClockIcon className="w-6 h-6 text-red-500" /> Quá hạn
+          </>
+        );
+      default:
+        if (filter.startsWith("category_")) {
+          const cat = categories.find(
+            (c) => c.id === Number(filter.split("_")[1]),
+          );
+          return cat ? (
+            <>
+              <HashtagIcon className="w-6 h-6 text-emerald-500" /> {cat.name}
+            </>
+          ) : (
+            "Danh sách"
+          );
+        }
+        return "Danh sách";
+    }
+  };
 
   if (isLoading || !isAuthenticated) {
     return (
@@ -192,220 +262,43 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <NavBar currentTab={currentTab} onTabChange={setCurrentTab} />
-      <div className="w-full px-4 sm:px-6 md:px-10 mt-8 mb-20">
-        {/* Hộp thông báo của react-hot-toast */}
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        currentFilter={filter}
+        onFilterChange={(f) => {
+          setFilter(f);
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        categories={categories}
+        onAddCategory={handleAddCategory}
+        onEditCategory={handleEditCategory}
+        onDeleteCategory={handleDeleteCategory}
+        user={user}
+        onLogout={logout}
+      />
+
+      <main className="flex-1 overflow-y-auto relative p-4 sm:p-6 md:p-8 custom-scrollbar">
+        <Toaster
+          position="bottom-center"
+          reverseOrder={true}
+          toastOptions={{ duration: 1500 }}
+        />
+
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="absolute top-4 left-4 z-10 p-2 bg-white rounded-md shadow-sm border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+            title="Mở thanh bên"
+          >
+            <Bars3Icon className="w-5 h-5" />
+          </button>
+        )}
+
         <div>
-          <Toaster
-            position="bottom-left"
-            reverseOrder={true}
-            toastOptions={{ duration: 1500 }}
-          />
-        </div>
-        {/* Giao diện trang web thay đổi khi mở từ nav bar */}
-        <AnimatePresence mode="wait">
-          {/* Hiển thị giao diện khi ấn "Danh sách công việc" */}
-          {currentTab === "list" && (
-            <motion.div
-              key="list-manage"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-                📝 DANH SÁCH CÔNG VIỆC
-              </h1>
-
-              {/* Bảng Thống kê 3 ô */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:shadow-md">
-                  <p className="text-gray-500 text-sm font-medium mb-1">
-                    Tổng cộng
-                  </p>
-                  <p className="text-3xl font-bold text-gray-800">
-                    {totalCount}
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:shadow-md">
-                  <p className="text-gray-500 text-sm font-medium mb-1">
-                    Chưa xong (Còn hạn)
-                  </p>
-                  <p className="text-3xl font-bold text-blue-600">
-                    {activeCount}
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm flex flex-col items-center justify-center transition-transform hover:shadow-md">
-                  <p className="text-gray-500 text-sm font-medium mb-1">
-                    Hoàn thành
-                  </p>
-                  <p className="text-3xl font-bold text-emerald-600">
-                    {completedCount}
-                  </p>
-                </div>
-              </div>
-
-              {/* Component hiển thị các nút bộ lọc */}
-              <FilterBar
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                filter={filter}
-                setFilter={setFilter}
-              />
-
-              {/* Thanh công cụ phụ (Chế độ sửa, View Mode) */}
-              {currentTab === "list" && (
-                <div className="flex justify-between items-center mb-4">
-                  {/* Công tắc chế độ sửa */}
-                  <label className="flex items-center cursor-pointer select-none group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={isManageMode}
-                        onChange={() => setIsManageMode(!isManageMode)}
-                      />
-                      {/* Nền của công tắc */}
-                      <div
-                        className={`block w-14 h-8 rounded-full transition-colors duration-300 ease-in-out shadow-inner border border-black/10 ${
-                          isManageMode ? "bg-emerald-500" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      {/* Hình tròn trượt */}
-                      <div
-                        className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-md flex items-center justify-center ${
-                          isManageMode ? "transform translate-x-6" : ""
-                        }`}
-                      >
-                        {isManageMode ? (
-                          <svg
-                            className="w-4 h-4 text-emerald-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="3"
-                              d="M5 13l4 4L19 7"
-                            ></path>
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-4 h-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          ></svg>
-                        )}
-                      </div>
-                    </div>
-                    {/* Chữ bên cạnh nút */}
-                    <span
-                      className={`ml-3 text-sm font-semibold transition-colors duration-200 ${
-                        isManageMode
-                          ? "text-emerald-600"
-                          : "text-gray-500 group-hover:text-gray-700"
-                      }`}
-                    >
-                      Chế độ sửa
-                    </span>
-                  </label>
-                  {/* Chế độ xem: Danh sách / Lịch */}
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm ${
-                        viewMode === "list"
-                          ? "bg-emerald-600 text-white"
-                          : "bg-white text-gray-700 border border-gray-400 hover:bg-gray-50"
-                      }`}
-                    >
-                      📝 Danh sách
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Hiển thị dữ liệu các công việc */}
-              {viewMode === "list" ? (
-                <div className="bg-white p-3 rounded-xl border border-gray-400 shadow-inner bg-co">
-                  <ul className="space-y-4 h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
-                    {filteredTodos.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
-                        <span className="text-7xl drop-shadow-md">✨</span>
-                        <p className="text-xl font-bold text-gray-700">
-                          Chưa có công việc nào ở đây cả!
-                        </p>
-                        <p className="text-sm font-medium">
-                          Hãy thêm một vài công việc để bắt đầu ngày mới nhé.
-                        </p>
-                      </div>
-                    ) : (
-                      filteredTodos.map((todo) => (
-                        //Mở component hiển thị danh sách công việc
-                        <TodoListItem
-                          key={todo.id}
-                          todo={todo}
-                          categories={categories}
-                          handleCompleteToggle={handleCompleteToggle}
-                          handleDelete={handleDelete}
-                          handleEdit={handleEdit}
-                          isManage={isManageMode}
-                        />
-                      ))
-                    )}
-                  </ul>
-                </div>
-              ) : (
-                //Kiểu lịch
-                //<TodoCalendar todos={filteredTodos} />
-                <></>
-              )}
-            </motion.div>
-          )}
-
-          {/* Hiển thị giao diện khi ấn "Thêm công việc" */}
-          {currentTab === "add" && (
-            <motion.div
-              key="add"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-                ➕ THÊM CÔNG VIỆC
-              </h1>
-              {/* Mở component form tạo mới công việc */}
-              <TodoForm categories={categories} onAdd={handleAdd} />
-            </motion.div>
-          )}
-
-          {/* Hiển thị giao diện khi ấn "Quản lý thẻ" */}
-          {currentTab === "manage_categories" && (
-            <motion.div
-              key="manage_categories"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-                🏷️ QUẢN LÝ THẺ
-              </h1>
-              {/* Mở component quản lý thẻ */}
-              <CategoryManager
-                categories={categories}
-                refreshCategories={fetchCategories}
-              />
-            </motion.div>
-          )}
-
-          {/* Hiển thị giao diện khi ấn "Thùng rác" */}
-          {currentTab === "trash" && (
+          {filter === "trash" ? (
             <TrashView
               trashTodos={trashTodos}
               categories={categories}
@@ -413,9 +306,47 @@ export default function Home() {
               handleRestore={handleRestore}
               handleEdit={handleEdit}
             />
+          ) : (
+          <>
+            <div
+              className={`bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-sm rounded-2xl p-6 md:p-8 max-w-5xl mx-auto ${!isSidebarOpen ? "mt-12" : ""}`}
+            >
+              <h1 className="text-2xl font-semibold mb-6 text-gray-800 tracking-tight flex items-center gap-2">
+                {getPageTitle()}
+              </h1>
+
+              <div className="bg-white md:px-2 rounded-xl">
+                <ul className="space-y-0 h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {filteredTodos.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
+                      <SparklesIcon className="w-16 h-16 text-emerald-400 drop-shadow-md" />
+                      <p className="text-xl font-bold text-gray-700">
+                        Không có công việc nào!
+                      </p>
+                    </div>
+                  ) : (
+                    filteredTodos.map((todo) => (
+                      <TodoListItem
+                        key={todo.id}
+                        todo={todo}
+                        categories={categories}
+                        handleCompleteToggle={handleCompleteToggle}
+                        handleDelete={handleDelete}
+                        handleEdit={handleEdit}
+                      />
+                    ))
+                  )}
+                </ul>
+              </div>
+            </div>
+            
+            <div className={`max-w-5xl mx-auto ${!isSidebarOpen ? "mt-4" : "mt-4"}`}>
+              <TodoForm categories={categories} onAdd={handleAdd} />
+            </div>
+          </>
           )}
-        </AnimatePresence>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (avatarUrl) localStorage.setItem("avatarUrl", avatarUrl);
 
     if (role === "Admin") {
-      router.push("/admin");
+      router.push("/");
     } else {
       router.push("/");
     }

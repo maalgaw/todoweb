@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
 import { TodoItem, Category } from "../types";
 import TodoListItem from "./TodoListItem";
+import { TrashIcon, ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 
 //Định nghĩa dữ liệu nhận từ component cha
 interface Props {
@@ -19,22 +19,19 @@ export default function TrashView({
   handleEdit,
 }: Props) {
   return (
-    <motion.div
+    <div
       key="trash"
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.2 }}
+      className="bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-sm rounded-2xl p-6 md:p-8 max-w-5xl mx-auto"
     >
-      <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 tracking-tight">
-        🗑️ THÙNG RÁC
+      <h1 className="text-2xl font-semibold mb-6 text-gray-800 tracking-tight flex items-center gap-2">
+        <TrashIcon className="w-6 h-6 text-red-500" /> Thùng rác
       </h1>
 
-      <div className="bg-white p-3 rounded-xl border border-gray-400 shadow-inner bg-co">
-        <ul className="space-y-4 h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="bg-white md:px-2 rounded-xl mt-4">
+        <ul className="space-y-0 h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
           {trashTodos.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4 opacity-80 pt-20">
-              <span className="text-7xl drop-shadow-md">🍃</span>
+              <ArchiveBoxXMarkIcon className="w-16 h-16 text-emerald-400 drop-shadow-md" />
               <p className="text-xl font-bold text-gray-700">
                 Thùng rác đang trống!
               </p>
@@ -52,13 +49,12 @@ export default function TrashView({
                 handleDelete={handleHardDelete}
                 handleEdit={handleEdit}
                 handleRestore={() => handleRestore(todo)}
-                isManage={false}
                 isTrashView={true}
               />
             ))
           )}
         </ul>
       </div>
-    </motion.div>
+    </div>
   );
 }

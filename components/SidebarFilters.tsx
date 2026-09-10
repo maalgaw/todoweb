@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   TrashIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 
 interface SidebarFiltersProps {
@@ -41,6 +42,11 @@ export default function SidebarFilters({
       id: "overdue",
       label: "Quá hạn",
       icon: <ClockIcon className="w-5 h-5 text-red-500" />,
+    },
+    {
+      id: "shared",
+      label: "Đã được chia sẻ",
+      icon: <UsersIcon className="w-5 h-5 text-indigo-500" />,
     },
   ];
 

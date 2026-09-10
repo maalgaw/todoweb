@@ -9,6 +9,7 @@ import {
 import { Category } from "../types";
 import SidebarFilters from "./SidebarFilters";
 import SidebarTags from "./SidebarTags";
+import FriendsModal from "./FriendsModal";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export default function Sidebar({
   onDeleteCategory,
 }: SidebarProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false);
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -113,6 +115,16 @@ export default function Sidebar({
                   <UserIcon className="w-4 h-4" />
                   Tài khoản
                 </button>
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    setIsFriendsModalOpen(true);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-emerald-600 flex items-center gap-2"
+                >
+                  <UserIcon className="w-4 h-4" />
+                  Quản lý bạn bè
+                </button>
                 {user?.role === "Admin" && (
                   <button
                     onClick={() => {
@@ -177,6 +189,11 @@ export default function Sidebar({
           onDeleteCategory={onDeleteCategory}
         />
       </div>
+
+      <FriendsModal
+        isOpen={isFriendsModalOpen}
+        onClose={() => setIsFriendsModalOpen(false)}
+      />
     </div>
   );
 }

@@ -26,6 +26,9 @@ export default function TodoItemEdit({
   handleCancel,
 }: Props) {
   const [editTitle, setEditTitle] = useState(todo.title);
+  const [editDescription, setEditDescription] = useState(
+    todo.description || "",
+  );
   const [editDueDate, setEditDueDate] = useState(
     todo.dueDate ? todo.dueDate.slice(0, 16) : "",
   );
@@ -86,6 +89,7 @@ export default function TodoItemEdit({
     handleEdit(todo.id, {
       ...todo,
       title: editTitle.trim(),
+      description: editDescription.trim() || null,
       dueDate: editDueDate || null,
       priority: editPriority,
       categoryId: editCategoryId === "" ? undefined : editCategoryId,
@@ -176,7 +180,7 @@ export default function TodoItemEdit({
           onChange={(e) => setEditTitle(e.target.value)}
           onKeyDown={handleKeyDown}
           autoFocus
-          className="flex-1 bg-transparent border-none focus:outline-none text-sm text-gray-800 placeholder-gray-500"
+          className="flex-1 bg-transparent border-none focus:outline-none text-sm font-medium text-gray-800 placeholder-gray-500"
         />
 
         <div className="flex items-center gap-1 shrink-0 relative">
@@ -305,6 +309,16 @@ export default function TodoItemEdit({
         </div>
       </div>
 
+      <div className="pl-12 pr-4 pt-1 w-full">
+        <textarea
+          placeholder="Thêm ghi chú..."
+          value={editDescription}
+          onChange={(e) => setEditDescription(e.target.value)}
+          className="w-full bg-transparent border-none focus:outline-none text-xs text-gray-600 placeholder-gray-400 resize-none min-h-10"
+          rows={2}
+        />
+      </div>
+
       {/* Steps List */}
       <div className="pl-12 pr-4 pt-2 border-t border-gray-100 w-full mt-1">
         <div className="space-y-1 mb-2">
@@ -318,11 +332,18 @@ export default function TodoItemEdit({
                 }
                 className="w-4 h-4 text-emerald-500 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer"
               />
-              <span
-                className={`flex-1 text-sm ${step.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}
-              >
-                {step.title}
-              </span>
+              <div className="flex-1 min-w-0 flex flex-col">
+                <span
+                  className={`text-sm ${step.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}
+                >
+                  {step.title}
+                </span>
+                {step.isCompleted && step.completedByUser && (
+                  <span className="text-[10px] text-emerald-600">
+                    Hoàn thành bởi: {step.completedByUser.displayName || step.completedByUser.username}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => handleDeleteStep(step.id)}
                 className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 rounded"

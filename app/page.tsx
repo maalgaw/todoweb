@@ -5,6 +5,7 @@ import api from "../lib/axiosConfig";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
 import { TodoItem, Category } from "../types";
 import TodoForm from "../components/TodoForm";
@@ -21,11 +22,13 @@ import {
   HashtagIcon,
   SparklesIcon,
   Bars3Icon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Home() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [trashTodos, setTrashTodos] = useState<TodoItem[]>([]);
+  const [sharedTodos, setSharedTodos] = useState<TodoItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [filter, setFilter] = useState("doing");
@@ -66,13 +69,44 @@ export default function Home() {
       .catch(() => toast.error("Không thể tải danh sách thùng rác"));
   }
 
+  function fetchSharedTodos() {
+    api
+      .get("/api/todos/shared")
+      .then((res) => setSharedTodos(res.data))
+      .catch(() => toast.error("Không thể tải danh sách chia sẻ"));
+  }
+
   useEffect(() => {
     fetchTodos();
     fetchCategories();
     fetchTrashTodos();
+    fetchSharedTodos();
     if (!sessionStorage.getItem("welcomeShown")) {
       toast("Chào mừng đến với app quản lý công việc!", { icon: "🎉" });
       sessionStorage.setItem("welcomeShown", "true");
+    }
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      const connection = new HubConnectionBuilder()
+        .withUrl("http://localhost:5001/hubs/todo", {
+          accessTokenFactory: () => token,
+        })
+        .withAutomaticReconnect()
+        .build();
+
+      connection.on("TodoUpdated", () => {
+        fetchTodos();
+        fetchSharedTodos();
+      });
+
+      connection
+        .start()
+        .catch((err) => console.error("SignalR Connection Error: ", err));
+
+      return () => {
+        connection.stop();
+      };
     }
   }, []);
 
@@ -183,7 +217,7 @@ export default function Home() {
     );
   }
 
-  const filteredTodos = todos.filter((todo) => {
+  const filteredTodos = filter === "shared" ? sharedTodos : todos.filter((todo) => {
     if (
       searchQuery &&
       !todo.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -237,6 +271,12 @@ export default function Home() {
         return (
           <>
             <ClockIcon className="w-6 h-6 text-red-500" /> Quá hạn
+          </>
+        );
+      case "shared":
+        return (
+          <>
+            <UsersIcon className="w-6 h-6 text-indigo-500" /> Đã được chia sẻ
           </>
         );
       default:

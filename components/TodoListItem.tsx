@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TodoItem, Category } from "../types";
 import TodoItemEdit from "./TodoItemEdit";
+import SharePopover from "./SharePopover";
 import {
   XMarkIcon,
   CheckIcon,
@@ -10,6 +11,7 @@ import {
   ArrowUturnLeftIcon,
   CalendarIcon,
   ArrowPathIcon,
+  PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
 
@@ -55,6 +57,7 @@ export default function TodoListItem({
   //Mặc định giao diện chỉnh sửa được tắt
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   //Hàm phụ hiển thị nhãn ưu tiên (Dạng dấu chấm nhỏ gọn)
   function renderPriorityBadge(priority: number) {
@@ -141,6 +144,13 @@ export default function TodoListItem({
           {/* Màu sắc, mức độ ưu tiên */}
           {renderPriorityBadge(todo.priority)}
 
+          {/* Hiển thị người hoàn thành */}
+          {todo.isCompleted && todo.completedByUser && (
+            <span className="text-xs text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
+              Hoàn thành bởi: {todo.completedByUser.displayName || todo.completedByUser.username}
+            </span>
+          )}
+
           {/* Thẻ công việc */}
           {todo.category && (
             <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -219,6 +229,24 @@ export default function TodoListItem({
           </>
         ) : (
           <>
+            {/* Nút Share */}
+            {!isTrashView && (
+              <div className="relative">
+                <button
+                  onClick={() => setIsShareOpen(!isShareOpen)}
+                  className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+                  title="Chia sẻ"
+                >
+                  <PaperAirplaneIcon className="w-4 h-4" />
+                </button>
+                <SharePopover
+                  todoId={todo.id}
+                  isOpen={isShareOpen}
+                  onClose={() => setIsShareOpen(false)}
+                />
+              </div>
+            )}
+
             {/* Nút Ghim (Chỉ ở trang Quản lý) */}
             {!isTrashView && (
               <button

@@ -19,23 +19,24 @@ Giao diện Web (Client Frontend) hiện đại, trực quan cho hệ thống **
 
 ## 🛠️ Công nghệ & Thư viện sử dụng
 
-| Công nghệ / Thư viện | Phiên bản | Vai trò / Mục đích |
-| :--- | :--- | :--- |
-| **Next.js** | `16.3.0` | React Framework mạnh mẽ với kiến trúc App Router tối ưu hiệu năng |
-| **React / React DOM** | `19.2.8` | Thư viện xây dựng giao diện người dùng theo component |
-| **TypeScript** | `^5` | Kiểm soát kiểu dữ liệu an toàn, hạn chế lỗi runtime |
-| **Tailwind CSS** | `^4.0` | Framework tiện ích xây dựng giao diện tùy biến, responsive |
-| **Axios** | `^1.19.0` | Thư viện gọi HTTP Request kết nối RESTful API Backend |
-| **@microsoft/signalr** | `^10.0.11` | Kết nối WebSocket thời gian thực nhận thông báo cập nhật công việc |
+| Công nghệ / Thư viện      | Phiên bản  | Vai trò / Mục đích                                                 |
+| :------------------------ | :--------- | :----------------------------------------------------------------- |
+| **Next.js**               | `16.3.0`   | React Framework mạnh mẽ với kiến trúc App Router tối ưu hiệu năng  |
+| **React / React DOM**     | `19.2.8`   | Thư viện xây dựng giao diện người dùng theo component              |
+| **TypeScript**            | `^5`       | Kiểm soát kiểu dữ liệu an toàn, hạn chế lỗi runtime                |
+| **Tailwind CSS**          | `^4.0`     | Framework tiện ích xây dựng giao diện tùy biến, responsive         |
+| **Axios**                 | `^1.19.0`  | Thư viện gọi HTTP Request kết nối RESTful API Backend              |
+| **@microsoft/signalr**    | `^10.0.11` | Kết nối WebSocket thời gian thực nhận thông báo cập nhật công việc |
 | **@supabase/supabase-js** | `^2.112.4` | SDK kết nối Supabase Cloud để lưu trữ và tải ảnh đại diện (Avatar) |
-| **react-hot-toast** | `^2.6.0` | Hiển thị thông báo Toast đẹp mắt, thông minh |
-| **@heroicons/react** | `^2.2.0` | Bộ biểu tượng icon hiện đại |
+| **react-hot-toast**       | `^2.6.0`   | Hiển thị thông báo Toast đẹp mắt, thông minh                       |
+| **@heroicons/react**      | `^2.2.0`   | Bộ biểu tượng icon hiện đại                                        |
 
 ---
 
 ## 📋 Yêu cầu hệ thống
 
 Trước khi bắt đầu, hãy đảm bảo máy tính đã cài đặt:
+
 - **Node.js**: Phiên bản `18.x` trở lên (khuyên dùng bản LTS `v20.x` hoặc `v22.x`). Kiểm tra bằng lệnh: `node -v`
 - **npm**: Đi kèm với Node.js (`npm -v`).
 - **Backend API (`Todo.Api`)**: Đã được khởi động và chạy tại cổng `http://localhost:5001`.
@@ -74,6 +75,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5001/api
 ```
 
 > **📌 Lưu ý cấu hình Supabase Cloud:**
+>
 > - File `.env.local` nằm trong `.gitignore` để bảo vệ khóa API.
 > - Nếu bạn tự tạo dự án Supabase riêng: Truy cập **Supabase Dashboard > Project Settings > API** để copy `Project URL` và `anon / public key`, đồng thời tạo một Bucket trong Storage tên là `avatars` ở chế độ **Public Bucket**.
 
@@ -94,12 +96,12 @@ Mở trình duyệt web và truy cập:
 
 ## 📦 Các lệnh thường dùng
 
-| Lệnh | Ý nghĩa |
-| :--- | :--- |
-| `npm run dev` | Chạy ứng dụng ở môi trường phát triển (Cổng mặc định: `3001`) |
-| `npm run build` | Đóng gói tối ưu hóa mã nguồn cho môi trường Production |
-| `npm run start` | Khởi chạy bản build Production |
-| `npm run lint` | Quét kiểm tra lỗi cú pháp và tiêu chuẩn code với ESLint |
+| Lệnh            | Ý nghĩa                                                       |
+| :-------------- | :------------------------------------------------------------ |
+| `npm run dev`   | Chạy ứng dụng ở môi trường phát triển (Cổng mặc định: `3001`) |
+| `npm run build` | Đóng gói tối ưu hóa mã nguồn cho môi trường Production        |
+| `npm run start` | Khởi chạy bản build Production                                |
+| `npm run lint`  | Quét kiểm tra lỗi cú pháp và tiêu chuẩn code với ESLint       |
 
 ---
 
